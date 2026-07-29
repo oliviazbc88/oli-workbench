@@ -838,14 +838,62 @@ body::after {
   align-items: center;
 }
 
-/* ====== Inspiration Notes ====== */
+/* ====== Inspiration Notes (Swipe + Edit) ====== */
+.swipe-item {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border-radius: var(--radius-sm);
+}
+
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: stretch;
+  z-index: 1;
+}
+
+.swipe-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  font-family: var(--font);
+  white-space: nowrap;
+  gap: 4px;
+}
+
+.swipe-action-edit {
+  background: var(--primary);
+}
+.swipe-action-edit:hover { background: var(--primary-dark); }
+
+.swipe-action-delete {
+  background: #e74c3c;
+}
+.swipe-action-delete:hover { background: #c0392b; }
+
 .note-card {
   background: linear-gradient(135deg, #fdfcf0, #fef9e7);
   border: 1px solid #f0e6c0;
   border-radius: var(--radius-sm);
   padding: 14px;
-  margin-bottom: 10px;
   position: relative;
+  z-index: 2;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  touch-action: pan-y;
+}
+
+.note-card.swiped {
+  transform: translateX(-130px);
 }
 
 .note-card .note-time {
@@ -860,15 +908,47 @@ body::after {
   color: #5a4a2c;
 }
 
-.note-card .note-delete {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  background: none;
-  border: none;
+.note-card .note-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.note-action-btn {
+  padding: 4px 10px;
+  border: 1px solid #ddd6a8;
+  background: #fffdf5;
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
   cursor: pointer;
-  color: #c9b96e;
-  font-size: 14px;
+  color: #8a7a3c;
+  font-family: var(--font);
+  transition: all var(--transition);
+}
+
+.note-action-btn:hover {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+.note-action-btn.danger:hover {
+  background: #fee2e2;
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.note-edit-area {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-xs);
+  padding: 8px;
+  font-size: 0.85rem;
+  font-family: var(--font);
+  resize: vertical;
+  outline: none;
+  margin-bottom: 6px;
 }
 
 /* ====== Week Selector ====== */
@@ -2775,20 +2855,140 @@ function deleteInspiration(id) {
   renderInspiration();
 }
 
+function editInspiration(id) {
+  const notes = storageGet('inspirations', []);
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+
+  const card = document.querySelector(`[data-inspiration-id="${id}"]`);
+  if (!card) return;
+
+  card.innerHTML = `
+    <div class="note-time">✏️ 编辑中 · ${note.date} ${note.time}</div>
+    <textarea class="note-edit-area" id="editArea-${id}">${escapeHtml(note.text)}</textarea>
+    <div class="note-actions">
+      <button class="note-action-btn" onclick="saveInspirationEdit(${id})">💾 保存</button>
+      <button class="note-action-btn" onclick="renderInspiration()">取消</button>
+    </div>
+  `;
+  const area = document.getElementById('editArea-' + id);
+  area.focus();
+  area.setSelectionRange(area.value.length, area.value.length);
+}
+
+function saveInspirationEdit(id) {
+  const area = document.getElementById('editArea-' + id);
+  if (!area) return;
+  const newText = area.value.trim();
+  if (!newText) return;
+  const notes = storageGet('inspirations', []);
+  const note = notes.find(n => n.id === id);
+  if (note) {
+    note.text = newText;
+    storageSet('inspirations', notes);
+  }
+  renderInspiration();
+}
+
+// Swipe handling
+function initSwipe(card, id) {
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  let isOpen = false;
+
+  function onStart(e) {
+    // Don't start swipe if editing
+    if (card.querySelector('.note-edit-area')) return;
+    startX = e.touches ? e.touches[0].clientX : e.clientX;
+    isDragging = true;
+    card.style.transition = 'none';
+  }
+
+  function onMove(e) {
+    if (!isDragging) return;
+    currentX = e.touches ? e.touches[0].clientX : e.clientX;
+    let diff = currentX - startX;
+    // Only allow left swipe (negative)
+    if (diff > 0 && !isOpen) diff = 0;
+    if (isOpen) diff = diff - 130; // offset for open state
+    if (diff < -130) diff = -130;
+    card.style.transform = `translateX(${diff}px)`;
+  }
+
+  function onEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    card.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+    let diff = currentX - startX;
+    if (isOpen) diff -= 130;
+
+    if (diff < -50) {
+      // Open
+      card.classList.add('swiped');
+      card.style.transform = '';
+      isOpen = true;
+    } else {
+      // Close
+      card.classList.remove('swiped');
+      card.style.transform = '';
+      isOpen = false;
+    }
+  }
+
+  card.addEventListener('touchstart', onStart, { passive: true });
+  card.addEventListener('touchmove', onMove, { passive: true });
+  card.addEventListener('touchend', onEnd);
+  card.addEventListener('mousedown', onStart);
+  card.addEventListener('mousemove', e => { if (isDragging) onMove(e); });
+  card.addEventListener('mouseup', onEnd);
+  card.addEventListener('mouseleave', onEnd);
+
+  // Store state for toggle
+  card._swipeOpen = () => isOpen;
+  card._setSwipeOpen = (v) => { isOpen = v; };
+}
+
+function toggleSwipe(card, id) {
+  const isOpen = card._swipeOpen ? card._swipeOpen() : false;
+  if (isOpen) {
+    card.classList.remove('swiped');
+    card._setSwipeOpen(false);
+  } else {
+    card.classList.add('swiped');
+    card._setSwipeOpen(true);
+  }
+}
+
 function renderInspiration() {
   const notes = storageGet('inspirations', []);
   let html = '';
   notes.forEach(n => {
-    html += `<div class="note-card">
-      <div class="note-time">💡 ${n.date} ${n.time}</div>
-      <div class="note-text">${escapeHtml(n.text).replace(/\n/g, '<br>')}</div>
-      <button class="note-delete" onclick="deleteInspiration(${n.id})">✕</button>
+    html += `<div class="swipe-item">
+      <div class="swipe-actions">
+        <button class="swipe-action-btn swipe-action-edit" onclick="editInspiration(${n.id})">✏️ 编辑</button>
+        <button class="swipe-action-btn swipe-action-delete" onclick="deleteInspiration(${n.id})">🗑 删除</button>
+      </div>
+      <div class="note-card" data-inspiration-id="${n.id}">
+        <div class="note-time">💡 ${n.date} ${n.time}</div>
+        <div class="note-text">${escapeHtml(n.text).replace(/\n/g, '<br>')}</div>
+        <div class="note-actions">
+          <button class="note-action-btn" onclick="editInspiration(${n.id})">✏️ 编辑</button>
+          <button class="note-action-btn danger" onclick="deleteInspiration(${n.id})">🗑 删除</button>
+        </div>
+      </div>
     </div>`;
   });
   if (!notes.length) {
     html = '<p style="text-align:center;color:var(--text-muted);padding:20px">💡 灵感一闪而过，快捕捉它~</p>';
   }
   document.getElementById('inspirationNotes').innerHTML = html;
+
+  // Initialize swipe on each card
+  notes.forEach(n => {
+    const card = document.querySelector(`[data-inspiration-id="${n.id}"]`);
+    if (card) initSwipe(card, n.id);
+  });
 }
 
 // ====== 9. 运动打卡 ======
