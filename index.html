@@ -675,9 +675,151 @@ body::after {
   font-style: italic;
 }
 
-.betterme-journal {
+/* ====== Timeline ====== */
+.timeline {
+  position: relative;
+  padding: 10px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--primary-light), var(--primary), var(--primary-light));
+  border-radius: 1px;
+}
+
+.timeline-entry {
+  position: relative;
+  padding-left: 48px;
+  margin-bottom: 24px;
+}
+
+.timeline-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.timeline-date::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--primary);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 4px var(--primary-bg);
+  z-index: 2;
+}
+
+.timeline-date .date-text {
+  font-size: 0.78rem;
+  color: var(--primary-dark);
+  font-weight: 600;
+  background: var(--primary-bg);
+  padding: 3px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.timeline-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.timeline-card .entry-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.timeline-card .entry-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.timeline-delete {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all var(--transition);
+}
+
+.timeline-card:hover .timeline-delete { opacity: 1; }
+.timeline-delete:hover { background: #fee2e2; color: #e74c3c; }
+
+/* ====== Emoji Picker ====== */
+.emoji-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.emoji-option {
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: all var(--transition);
+  background: transparent;
+  border: 2px solid transparent;
+  line-height: 1;
+}
+
+.emoji-option:hover {
+  background: var(--primary-bg);
+  transform: scale(1.15);
+}
+
+.emoji-option.selected {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.entry-emoji {
+  font-size: 1.5rem;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+/* Journal input area */
+.journal-input-area {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.journal-input-area textarea {
   width: 100%;
-  min-height: 120px;
+  min-height: 80px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 12px;
@@ -685,9 +827,16 @@ body::after {
   font-family: var(--font);
   resize: vertical;
   outline: none;
+  margin-bottom: 10px;
 }
 
-.betterme-journal:focus { border-color: var(--primary); }
+.journal-input-area textarea:focus { border-color: var(--primary); }
+
+.journal-input-area .input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 /* ====== Inspiration Notes ====== */
 .note-card {
@@ -1274,10 +1423,35 @@ body::after {
         <div class="quote-cn">每一天都是一个新的开始，用微笑迎接阳光。</div>
         <div class="quote-en">Every day is a fresh start. Greet the sunshine with a smile.</div>
       </div>
+
+      <!-- 输入区 -->
+      <div class="journal-input-area">
+        <div class="card-title" style="margin-bottom:8px"><span class="icon">📝</span>今日心情日记</div>
+        <div class="emoji-picker" id="emojiPicker">
+          <span class="emoji-option" data-emoji="😊" onclick="selectEmoji(this)">😊</span>
+          <span class="emoji-option" data-emoji="🥰" onclick="selectEmoji(this)">🥰</span>
+          <span class="emoji-option" data-emoji="😆" onclick="selectEmoji(this)">😆</span>
+          <span class="emoji-option" data-emoji="😌" onclick="selectEmoji(this)">😌</span>
+          <span class="emoji-option" data-emoji="🤩" onclick="selectEmoji(this)">🤩</span>
+          <span class="emoji-option" data-emoji="💪" onclick="selectEmoji(this)">💪</span>
+          <span class="emoji-option" data-emoji="😢" onclick="selectEmoji(this)">😢</span>
+          <span class="emoji-option" data-emoji="😤" onclick="selectEmoji(this)">😤</span>
+          <span class="emoji-option" data-emoji="🤔" onclick="selectEmoji(this)">🤔</span>
+          <span class="emoji-option" data-emoji="😴" onclick="selectEmoji(this)">😴</span>
+          <span class="emoji-option" data-emoji="🎉" onclick="selectEmoji(this)">🎉</span>
+          <span class="emoji-option" data-emoji="🌈" onclick="selectEmoji(this)">🌈</span>
+        </div>
+        <textarea id="betterMeInput" placeholder="今天想对自己说些什么？"></textarea>
+        <div class="input-footer">
+          <span style="font-size:0.75rem;color:var(--text-muted)">选择心情 → 写下日记</span>
+          <button class="btn btn-primary" onclick="addBetterMeEntry()">💾 记录</button>
+        </div>
+      </div>
+
+      <!-- 时间轴 -->
       <div class="card">
-        <div class="card-title"><span class="icon">📓</span>今日心情 / 日记</div>
-        <textarea class="betterme-journal" id="betterMeJournal" placeholder="今天想对自己说些什么？" onchange="saveBetterMe()"></textarea>
-        <div class="mt-8" style="font-size:0.75rem;color:var(--text-muted);text-align:right">自动保存 ✦</div>
+        <div class="card-title"><span class="icon">⏳</span>心情时间轴</div>
+        <div class="timeline" id="betterMeTimeline"></div>
       </div>
     </section>
   </main>
@@ -2301,6 +2475,8 @@ function updateBudgetTotal() {
 }
 
 // ====== 12. Better Me ======
+let selectedEmoji = '😊';
+
 const dailyQuotes = [
   { cn: '每一天都是一个新的开始，用微笑迎接阳光。', en: 'Every day is a fresh start. Greet the sunshine with a smile.' },
   { cn: '不积跬步，无以至千里；不积小流，无以成江海。', en: 'A journey of a thousand miles begins with a single step.' },
@@ -2321,31 +2497,99 @@ const dailyQuotes = [
 function getDailyQuote() {
   const stored = storageGet('daily_quote', null);
   const t = today();
-
-  if (stored && stored.date === t) {
-    return stored;
-  }
-
-  // Pick a new random quote
+  if (stored && stored.date === t) return stored;
   const idx = Math.floor(Math.random() * dailyQuotes.length);
   const quote = { date: t, ...dailyQuotes[idx] };
   storageSet('daily_quote', quote);
   return quote;
 }
 
+function selectEmoji(el) {
+  document.querySelectorAll('#emojiPicker .emoji-option').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEmoji = el.dataset.emoji;
+}
+
+function addBetterMeEntry() {
+  const text = document.getElementById('betterMeInput').value.trim();
+  if (!text) return;
+
+  const entries = storageGet('betterme_entries', []);
+  const d = new Date();
+  entries.unshift({
+    id: Date.now(),
+    emoji: selectedEmoji,
+    text: text,
+    date: today(),
+    time: d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+    timestamp: d.toISOString()
+  });
+  storageSet('betterme_entries', entries);
+
+  document.getElementById('betterMeInput').value = '';
+  // Reset emoji to default
+  document.querySelectorAll('#emojiPicker .emoji-option').forEach(e => e.classList.remove('selected'));
+  const defaultEmoji = document.querySelector('#emojiPicker .emoji-option[data-emoji="😊"]');
+  if (defaultEmoji) defaultEmoji.classList.add('selected');
+  selectedEmoji = '😊';
+
+  renderBetterMe();
+}
+
+function deleteBetterMeEntry(id) {
+  let entries = storageGet('betterme_entries', []);
+  entries = entries.filter(e => e.id !== id);
+  storageSet('betterme_entries', entries);
+  renderBetterMe();
+}
+
 function renderBetterMe() {
+  // Quote
   const quote = getDailyQuote();
   document.getElementById('betterMeQuote').innerHTML = `
     <div class="quote-cn">${escapeHtml(quote.cn)}</div>
     <div class="quote-en">${escapeHtml(quote.en)}</div>
   `;
 
-  const journal = storageGet('betterme_journal', '');
-  document.getElementById('betterMeJournal').value = journal;
-}
+  // Ensure default emoji is selected
+  if (!document.querySelector('#emojiPicker .emoji-option.selected')) {
+    const d = document.querySelector('#emojiPicker .emoji-option[data-emoji="😊"]');
+    if (d) d.classList.add('selected');
+  }
 
-function saveBetterMe() {
-  storageSet('betterme_journal', document.getElementById('betterMeJournal').value);
+  // Timeline
+  const entries = storageGet('betterme_entries', []);
+  let html = '';
+
+  if (entries.length === 0) {
+    html = '<p style="text-align:center;color:var(--text-muted);padding:30px">⏳ 还没有记录，写下第一条心情日记吧~</p>';
+  } else {
+    // Group by date for timeline display
+    let lastDate = '';
+    entries.forEach(entry => {
+      const entryDate = entry.date;
+      const dateCN = fmtDateCN(entryDate);
+
+      if (entryDate !== lastDate) {
+        // Show date header in the timeline
+        html += `<div class="timeline-date"><span class="date-text">📅 ${dateCN}</span></div>`;
+        lastDate = entryDate;
+      }
+
+      html += `<div class="timeline-entry">
+        <div class="timeline-card" style="position:relative">
+          <div>
+            <span class="entry-emoji">${escapeHtml(entry.emoji)}</span>
+            <span class="entry-time">${entry.time}</span>
+          </div>
+          <div class="entry-text" style="margin-top:6px">${escapeHtml(entry.text)}</div>
+          <button class="timeline-delete" onclick="deleteBetterMeEntry(${entry.id})" title="删除">✕</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('betterMeTimeline').innerHTML = html;
 }
 
 // ====== Utility ======
@@ -2372,14 +2616,6 @@ function init() {
 
 // Run on load
 document.addEventListener('DOMContentLoaded', init);
-
-// Auto-save better me journal periodically
-setInterval(() => {
-  const el = document.getElementById('betterMeJournal');
-  if (el && document.getElementById('page-better-me').classList.contains('active')) {
-    saveBetterMe();
-  }
-}, 5000);
 
 // Save budget on page leave
 window.addEventListener('beforeunload', () => {
