@@ -1136,6 +1136,7 @@ body::after {
         <div class="timer-controls">
           <button class="btn btn-primary" id="englishTimerBtn" onclick="toggleEnglishTimer()">开始</button>
           <button class="btn btn-outline" onclick="resetEnglishTimer()">重置</button>
+          <button class="btn btn-danger btn-sm" id="englishTimerStop" onclick="stopEnglishTimer()" style="display:none">⏹ 结束计时</button>
         </div>
         <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="englishTodayTime">0分钟</span></div>
       </div>
@@ -1245,6 +1246,7 @@ body::after {
         <div class="timer-controls">
           <button class="btn btn-primary" id="spanishTimerBtn" onclick="toggleSpanishTimer()">开始</button>
           <button class="btn btn-outline" onclick="resetSpanishTimer()">重置</button>
+          <button class="btn btn-danger btn-sm" id="spanishTimerStop" onclick="stopSpanishTimer()" style="display:none">⏹ 结束计时</button>
         </div>
         <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="spanishTodayTime">0分钟</span></div>
       </div>
@@ -1814,50 +1816,219 @@ function renderReadingList() {
   document.getElementById('readingList').innerHTML = html;
 }
 
-// ====== 4. 英语学习 ======
-let englishTimerInterval = null;
-let englishTimerRunning = false;
+// ====== Global Timer Engine (runs regardless of page) ======
+// Both English and Spanish timers share a single global setInterval
+// Timer states are stored in localStorage so they survive page switches
 
+(function() {
+  // Master timer: ticks every second, updates whichever timer is running
+  let masterInterval = null;
+
+  function masterTick() {
+    const now = Date.now();
+    // English
+    if (storageGet('eng_timer_running', false)) {
+      const startAt = storageGet('eng_timer_start', 0);
+      if (startAt > 0) {
+        const elapsed = Math.floor((now - startAt) / 1000);
+        setEnglishSeconds(elapsed);
+      }
+    }
+    // Spanish
+    if (storageGet('spa_timer_running', false)) {
+      const startAt = storageGet('spa_timer_start', 0);
+      if (startAt > 0) {
+        const elapsed = Math.floor((now - startAt) / 1000);
+        setSpanishSeconds(elapsed);
+      }
+    }
+    // Update displays if the relevant page is visible
+    refreshTimerDisplays();
+  }
+
+  function ensureMasterRunning() {
+    if (!masterInterval) {
+      masterInterval = setInterval(masterTick, 1000);
+    }
+  }
+
+  function maybeStopMaster() {
+    if (!storageGet('eng_timer_running', false) && !storageGet('spa_timer_running', false)) {
+      if (masterInterval) {
+        clearInterval(masterInterval);
+        masterInterval = null;
+      }
+    }
+  }
+
+  // Expose to global
+  window._ensureMasterTimer = ensureMasterRunning;
+  window._maybeStopMaster = maybeStopMaster;
+  window._isMasterRunning = () => !!masterInterval;
+})();
+
+// Helper to refresh timer displays safely (ignore if DOM not present)
+function refreshTimerDisplays() {
+  const engEl = document.getElementById('englishTimer');
+  if (engEl) {
+    const s = getEnglishSeconds();
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    engEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    const todayEl = document.getElementById('englishTodayTime');
+    if (todayEl) todayEl.textContent = `${Math.floor(s / 60)}分钟`;
+  }
+  const spaEl = document.getElementById('spanishTimer');
+  if (spaEl) {
+    const s = getSpanishSeconds();
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    spaEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    const todayEl = document.getElementById('spanishTodayTime');
+    if (todayEl) todayEl.textContent = `${Math.floor(s / 60)}分钟`;
+  }
+  // Update button states
+  refreshTimerButtons();
+}
+
+function refreshTimerButtons() {
+  // English
+  const engBtn = document.getElementById('englishTimerBtn');
+  const engStop = document.getElementById('englishTimerStop');
+  if (engBtn) {
+    const running = storageGet('eng_timer_running', false);
+    if (running) {
+      engBtn.textContent = '暂停';
+      engBtn.classList.add('btn-primary');
+      engBtn.classList.remove('btn-outline');
+      if (engStop) engStop.style.display = 'inline-block';
+    } else {
+      const secs = getEnglishSeconds();
+      engBtn.textContent = secs > 0 ? '继续' : '开始';
+      engBtn.classList.add(secs > 0 ? 'btn-outline' : 'btn-primary');
+      if (secs === 0) engBtn.classList.remove('btn-outline');
+      if (engStop) engStop.style.display = 'none';
+    }
+  }
+  // Spanish
+  const spaBtn = document.getElementById('spanishTimerBtn');
+  const spaStop = document.getElementById('spanishTimerStop');
+  if (spaBtn) {
+    const running = storageGet('spa_timer_running', false);
+    if (running) {
+      spaBtn.textContent = '暂停';
+      spaBtn.classList.add('btn-primary');
+      spaBtn.classList.remove('btn-outline');
+      if (spaStop) spaStop.style.display = 'inline-block';
+    } else {
+      const secs = getSpanishSeconds();
+      spaBtn.textContent = secs > 0 ? '继续' : '开始';
+      spaBtn.classList.add(secs > 0 ? 'btn-outline' : 'btn-primary');
+      if (secs === 0) spaBtn.classList.remove('btn-outline');
+      if (spaStop) spaStop.style.display = 'none';
+    }
+  }
+}
+
+// ====== 4. 英语学习 (timer logic) ======
 function getEnglishSeconds() { return storageGet('english_timer_secs', 0); }
 function setEnglishSeconds(s) { storageSet('english_timer_secs', s); storageSet('english_timer_secs_yesterday', s); }
 
 function updateEnglishTimerDisplay() {
-  const s = getEnglishSeconds();
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  document.getElementById('englishTimer').textContent =
-    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-  document.getElementById('englishTodayTime').textContent = `${Math.floor(s / 60)}分钟`;
+  refreshTimerDisplays();
 }
 
 function toggleEnglishTimer() {
-  if (englishTimerRunning) {
-    clearInterval(englishTimerInterval);
-    englishTimerRunning = false;
-    document.getElementById('englishTimerBtn').textContent = '继续';
-    document.getElementById('englishTimerBtn').classList.remove('btn-primary');
-    document.getElementById('englishTimerBtn').classList.add('btn-outline');
+  const running = storageGet('eng_timer_running', false);
+  if (running) {
+    // Pause: save elapsed, stop
+    storageSet('eng_timer_running', false);
+    storageSet('eng_timer_start', 0);
+    window._maybeStopMaster();
   } else {
-    englishTimerInterval = setInterval(() => {
-      setEnglishSeconds(getEnglishSeconds() + 1);
-      updateEnglishTimerDisplay();
-    }, 1000);
-    englishTimerRunning = true;
-    document.getElementById('englishTimerBtn').textContent = '暂停';
-    document.getElementById('englishTimerBtn').classList.add('btn-primary');
-    document.getElementById('englishTimerBtn').classList.remove('btn-outline');
+    // Start/resume: set start timestamp based on current elapsed
+    const currentSecs = getEnglishSeconds();
+    storageSet('eng_timer_start', Date.now() - currentSecs * 1000);
+    storageSet('eng_timer_running', true);
+    window._ensureMasterTimer();
   }
+  refreshTimerButtons();
+}
+
+function stopEnglishTimer() {
+  // "结束计时": pause + record to calendar
+  storageSet('eng_timer_running', false);
+  storageSet('eng_timer_start', 0);
+  window._maybeStopMaster();
+
+  // Save current session to calendar
+  const secs = getEnglishSeconds();
+  if (secs > 0) {
+    const cal = storageGet('english_calendar', {});
+    cal[today()] = Math.round(secs / 60);
+    storageSet('english_calendar', cal);
+    // Reset timer for next session
+    setEnglishSeconds(0);
+  }
+  refreshTimerDisplays();
+  renderEnglishCalendar();
 }
 
 function resetEnglishTimer() {
-  clearInterval(englishTimerInterval);
-  englishTimerRunning = false;
+  storageSet('eng_timer_running', false);
+  storageSet('eng_timer_start', 0);
   setEnglishSeconds(0);
-  updateEnglishTimerDisplay();
-  document.getElementById('englishTimerBtn').textContent = '开始';
-  document.getElementById('englishTimerBtn').classList.add('btn-primary');
-  document.getElementById('englishTimerBtn').classList.remove('btn-outline');
+  window._maybeStopMaster();
+  refreshTimerDisplays();
+}
+
+// ====== 5. 西班牙语学习 (timer logic) ======
+function getSpanishSeconds() { return storageGet('spanish_timer_secs', 0); }
+function setSpanishSeconds(s) { storageSet('spanish_timer_secs', s); storageSet('spanish_timer_secs_yesterday', s); }
+
+function updateSpanishTimerDisplay() {
+  refreshTimerDisplays();
+}
+
+function toggleSpanishTimer() {
+  const running = storageGet('spa_timer_running', false);
+  if (running) {
+    storageSet('spa_timer_running', false);
+    storageSet('spa_timer_start', 0);
+    window._maybeStopMaster();
+  } else {
+    const currentSecs = getSpanishSeconds();
+    storageSet('spa_timer_start', Date.now() - currentSecs * 1000);
+    storageSet('spa_timer_running', true);
+    window._ensureMasterTimer();
+  }
+  refreshTimerButtons();
+}
+
+function stopSpanishTimer() {
+  storageSet('spa_timer_running', false);
+  storageSet('spa_timer_start', 0);
+  window._maybeStopMaster();
+
+  const secs = getSpanishSeconds();
+  if (secs > 0) {
+    const cal = storageGet('spanish_calendar', {});
+    cal[today()] = Math.round(secs / 60);
+    storageSet('spanish_calendar', cal);
+    setSpanishSeconds(0);
+  }
+  refreshTimerDisplays();
+  renderSpanishCalendar();
+}
+
+function resetSpanishTimer() {
+  storageSet('spa_timer_running', false);
+  storageSet('spa_timer_start', 0);
+  setSpanishSeconds(0);
+  window._maybeStopMaster();
+  refreshTimerDisplays();
 }
 
 function renderEnglishCalendar() {
@@ -2091,52 +2262,6 @@ function updateEnglishWeekLabel() {
   const weekNum = getWeekNumber();
   const year = new Date().getFullYear();
   document.getElementById('englishWeekLabel').textContent = `${year}年第${weekNum}周`;
-}
-
-// ====== 5. 西班牙语学习 ======
-let spanishTimerInterval = null;
-let spanishTimerRunning = false;
-
-function getSpanishSeconds() { return storageGet('spanish_timer_secs', 0); }
-function setSpanishSeconds(s) { storageSet('spanish_timer_secs', s); storageSet('spanish_timer_secs_yesterday', s); }
-
-function updateSpanishTimerDisplay() {
-  const s = getSpanishSeconds();
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  document.getElementById('spanishTimer').textContent =
-    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-  document.getElementById('spanishTodayTime').textContent = `${Math.floor(s / 60)}分钟`;
-}
-
-function toggleSpanishTimer() {
-  if (spanishTimerRunning) {
-    clearInterval(spanishTimerInterval);
-    spanishTimerRunning = false;
-    document.getElementById('spanishTimerBtn').textContent = '继续';
-    document.getElementById('spanishTimerBtn').classList.remove('btn-primary');
-    document.getElementById('spanishTimerBtn').classList.add('btn-outline');
-  } else {
-    spanishTimerInterval = setInterval(() => {
-      setSpanishSeconds(getSpanishSeconds() + 1);
-      updateSpanishTimerDisplay();
-    }, 1000);
-    spanishTimerRunning = true;
-    document.getElementById('spanishTimerBtn').textContent = '暂停';
-    document.getElementById('spanishTimerBtn').classList.add('btn-primary');
-    document.getElementById('spanishTimerBtn').classList.remove('btn-outline');
-  }
-}
-
-function resetSpanishTimer() {
-  clearInterval(spanishTimerInterval);
-  spanishTimerRunning = false;
-  setSpanishSeconds(0);
-  updateSpanishTimerDisplay();
-  document.getElementById('spanishTimerBtn').textContent = '开始';
-  document.getElementById('spanishTimerBtn').classList.add('btn-primary');
-  document.getElementById('spanishTimerBtn').classList.remove('btn-outline');
 }
 
 function renderSpanishCalendar() {
@@ -2701,6 +2826,12 @@ function escapeHtml(str) {
 // ====== Init ======
 function init() {
   checkDailyReset();
+
+  // Restore timer states from localStorage
+  if (storageGet('eng_timer_running', false) || storageGet('spa_timer_running', false)) {
+    window._ensureMasterTimer();
+    refreshTimerDisplays();
+  }
 
   // Set sidebar date
   document.getElementById('sidebarDate').textContent = fmtDateCN(today());
