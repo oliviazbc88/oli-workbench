@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oli-workbench-v1';
+const CACHE_NAME = 'oli-workbench-v2';
 const ASSETS = [
   '/oli-workbench/index.html',
   '/oli-workbench/manifest.json',
@@ -7,6 +7,8 @@ const ASSETS = [
   '/oli-workbench/favicon.png'
 ];
 
+// Network-first strategy: always try network, fallback to cache
+// This ensures users always get the latest version
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
@@ -26,21 +28,38 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // For HTML pages: network-first (always fetch latest)
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // For other assets: cache-first, network fallback
   event.respondWith(
     caches.match(event.request).then(cached => {
-      return cached || fetch(event.request).then(response => {
+      const fetchPromise = fetch(event.request).then(response => {
         if (response && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        // Offline fallback
-        if (event.request.mode === 'navigate') {
-          return caches.match('/oli-workbench/index.html');
-        }
-        return new Response('Offline', { status: 503 });
       });
+      return cached || fetchPromise;
     })
   );
+});
+
+// Notify client when new version is available
+self.addEventListener('message', event => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
