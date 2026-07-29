@@ -510,6 +510,120 @@ body::after {
 .cal-day.studied { background: var(--primary); }
 .cal-day.today { border: 2px solid var(--primary-dark); }
 
+/* ====== Month Calendar Grid ====== */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cal-nav-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--primary);
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font);
+  transition: all var(--transition);
+}
+
+.cal-nav-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.cal-nav-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cat-dark);
+}
+
+.cal-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.cal-month-grid .cal-weekday {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+.cal-month-grid .cal-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  color: var(--text-light);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  position: relative;
+  min-height: 32px;
+}
+
+.cal-month-grid .cal-cell.empty {
+  background: transparent;
+  border: none;
+}
+
+.cal-month-grid .cal-cell.checked {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  border-color: var(--primary);
+}
+
+.cal-month-grid .cal-cell.today {
+  border: 2px solid var(--primary-dark);
+}
+
+.cal-month-grid .cal-cell .cal-mins {
+  position: absolute;
+  bottom: 1px;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.8);
+}
+
+.cal-month-grid .cal-cell.checked:not(.has-mins) .cal-mins {
+  display: none;
+}
+
+.cal-summary {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background: var(--primary-bg);
+  border-radius: var(--radius-xs);
+  font-size: 0.82rem;
+  margin-top: 8px;
+}
+
+.cal-summary .sum-item {
+  text-align: center;
+}
+
+.cal-summary .sum-num {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  display: block;
+}
+
+.cal-summary .sum-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
 /* ====== Tab Switcher ====== */
 .tabs {
   display: flex;
@@ -1303,7 +1417,13 @@ body::after {
       <!-- Calendar -->
       <div class="card mb-12">
         <div class="card-title"><span class="icon">📅</span>打卡记录</div>
-        <div class="cal-heatmap" id="englishCalendar"></div>
+        <div class="cal-nav" id="englishCalNav">
+          <button class="cal-nav-btn" onclick="changeEnglishCalMonth(-1)">‹ 上月</button>
+          <span class="cal-nav-label" id="englishCalLabel"></span>
+          <button class="cal-nav-btn" onclick="changeEnglishCalMonth(1)">下月 ›</button>
+        </div>
+        <div class="cal-month-grid" id="englishCalendar"></div>
+        <div class="cal-summary" id="englishCalSummary"></div>
       </div>
       <!-- Daily Stats Table -->
       <div class="card mb-12">
@@ -1423,7 +1543,13 @@ body::after {
       </div>
       <div class="card mb-12">
         <div class="card-title"><span class="icon">📅</span>打卡记录</div>
-        <div class="cal-heatmap" id="spanishCalendar"></div>
+        <div class="cal-nav" id="spanishCalNav">
+          <button class="cal-nav-btn" onclick="changeSpanishCalMonth(-1)">‹ 上月</button>
+          <span class="cal-nav-label" id="spanishCalLabel"></span>
+          <button class="cal-nav-btn" onclick="changeSpanishCalMonth(1)">下月 ›</button>
+        </div>
+        <div class="cal-month-grid" id="spanishCalendar"></div>
+        <div class="cal-summary" id="spanishCalSummary"></div>
       </div>
       <!-- Daily Stats Table -->
       <div class="card mb-12">
@@ -1577,7 +1703,13 @@ body::after {
       </div>
       <div class="card">
         <div class="card-title"><span class="icon">📅</span>打卡日历</div>
-        <div class="cal-heatmap" id="sportsCalendar"></div>
+        <div class="cal-nav" id="sportsCalNav">
+          <button class="cal-nav-btn" onclick="changeSportsCalMonth(-1)">‹ 上月</button>
+          <span class="cal-nav-label" id="sportsCalLabel"></span>
+          <button class="cal-nav-btn" onclick="changeSportsCalMonth(1)">下月 ›</button>
+        </div>
+        <div class="cal-month-grid" id="sportsCalendar"></div>
+        <div class="cal-summary" id="sportsCalSummary"></div>
       </div>
     </section>
 
@@ -2235,23 +2367,70 @@ function resetSpanishTimer() {
   refreshTimerDisplays();
 }
 
+// English calendar month navigation state
+let englishCalOffset = 0;
+
+function changeEnglishCalMonth(delta) {
+  englishCalOffset += delta;
+  renderEnglishCalendar();
+}
+
 function renderEnglishCalendar() {
   const cal = storageGet('english_calendar', {});
-  const days = 90; // Show last 90 days
-  let html = '';
-  const t = today();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const ds = fmtDate(d);
+  const now = new Date();
+  const viewDate = new Date(now.getFullYear(), now.getMonth() + englishCalOffset, 1);
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+
+  const label = document.getElementById('englishCalLabel');
+  if (label) label.textContent = `${year}年${month + 1}月`;
+
+  const grid = document.getElementById('englishCalendar');
+  if (!grid) return;
+
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const offset = firstDay === 0 ? 6 : firstDay - 1; // Mon=0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = today();
+
+  // Weekday headers
+  const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+  let html = weekdays.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+
+  // Empty cells
+  for (let i = 0; i < offset; i++) html += '<div class="cal-cell empty"></div>';
+
+  // Day cells
+  let monthCheckedDays = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const mins = cal[ds] || 0;
-    let cls = '';
-    if (ds === t) cls = 'today';
-    if (mins > 0) cls += ' studied';
-    const title = `${ds}: ${mins}分钟`;
-    html += `<div class="cal-day ${cls}" title="${title}"></div>`;
+    const checked = mins > 0;
+    if (checked) monthCheckedDays++;
+    let cls = 'cal-cell';
+    if (checked) { cls += ' checked has-mins'; }
+    if (ds === todayStr) cls += ' today';
+    html += `<div class="${cls}" title="${ds}: ${mins}分钟">
+      ${d}${checked ? `<span class="cal-mins">${mins}m</span>` : ''}
+    </div>`;
   }
-  document.getElementById('englishCalendar').innerHTML = html;
+
+  grid.innerHTML = html;
+
+  // Year total
+  let yearCheckedDays = 0;
+  Object.keys(cal).forEach(date => {
+    if (date.startsWith(String(year)) && cal[date] > 0) yearCheckedDays++;
+  });
+
+  const summary = document.getElementById('englishCalSummary');
+  if (summary) {
+    summary.innerHTML = `
+      <div class="sum-item"><span class="sum-num">${monthCheckedDays}</span><span class="sum-label">本月打卡天数</span></div>
+      <div class="sum-item"><span class="sum-num">${yearCheckedDays}</span><span class="sum-label">全年打卡总天数</span></div>
+    `;
+  }
+
   renderEnglishStats();
 }
 
@@ -2500,23 +2679,66 @@ function updateEnglishWeekLabel() {
   document.getElementById('englishWeekLabel').textContent = `${year}年第${weekNum}周`;
 }
 
+// Spanish calendar month navigation state
+let spanishCalOffset = 0;
+
+function changeSpanishCalMonth(delta) {
+  spanishCalOffset += delta;
+  renderSpanishCalendar();
+}
+
 function renderSpanishCalendar() {
   const cal = storageGet('spanish_calendar', {});
-  const days = 90;
-  let html = '';
-  const t = today();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const ds = fmtDate(d);
+  const now = new Date();
+  const viewDate = new Date(now.getFullYear(), now.getMonth() + spanishCalOffset, 1);
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+
+  const label = document.getElementById('spanishCalLabel');
+  if (label) label.textContent = `${year}年${month + 1}月`;
+
+  const grid = document.getElementById('spanishCalendar');
+  if (!grid) return;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = today();
+
+  const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+  let html = weekdays.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+
+  for (let i = 0; i < offset; i++) html += '<div class="cal-cell empty"></div>';
+
+  let monthCheckedDays = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const mins = cal[ds] || 0;
-    let cls = '';
-    if (ds === t) cls = 'today';
-    if (mins > 0) cls += ' studied';
-    const title = `${ds}: ${mins}分钟`;
-    html += `<div class="cal-day ${cls}" title="${title}"></div>`;
+    const checked = mins > 0;
+    if (checked) monthCheckedDays++;
+    let cls = 'cal-cell';
+    if (checked) cls += ' checked has-mins';
+    if (ds === todayStr) cls += ' today';
+    html += `<div class="${cls}" title="${ds}: ${mins}分钟">
+      ${d}${checked ? `<span class="cal-mins">${mins}m</span>` : ''}
+    </div>`;
   }
-  document.getElementById('spanishCalendar').innerHTML = html;
+
+  grid.innerHTML = html;
+
+  let yearCheckedDays = 0;
+  Object.keys(cal).forEach(date => {
+    if (date.startsWith(String(year)) && cal[date] > 0) yearCheckedDays++;
+  });
+
+  const summary = document.getElementById('spanishCalSummary');
+  if (summary) {
+    summary.innerHTML = `
+      <div class="sum-item"><span class="sum-num">${monthCheckedDays}</span><span class="sum-label">本月打卡天数</span></div>
+      <div class="sum-item"><span class="sum-num">${yearCheckedDays}</span><span class="sum-label">全年打卡总天数</span></div>
+    `;
+  }
+
   renderSpanishStats();
 }
 
@@ -3062,19 +3284,66 @@ function renderSports() {
   }
 
   // Calendar
-  const days = 90;
-  let html = '';
-  const t = today();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const ds = fmtDate(d);
-    let cls = '';
-    if (ds === t) cls = 'today';
-    if (data[ds]) cls += ' studied';
-    html += `<div class="cal-day ${cls}" title="${ds}: ${data[ds] ? '已打卡' : '未打卡'}"></div>`;
+  renderSportsCalendar(data);
+}
+
+// Sports calendar month navigation state
+let sportsCalOffset = 0;
+
+function changeSportsCalMonth(delta) {
+  sportsCalOffset += delta;
+  const data = getSportsData();
+  renderSportsCalendar(data);
+}
+
+function renderSportsCalendar(data) {
+  const now = new Date();
+  const viewDate = new Date(now.getFullYear(), now.getMonth() + sportsCalOffset, 1);
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+
+  const label = document.getElementById('sportsCalLabel');
+  if (label) label.textContent = `${year}年${month + 1}月`;
+
+  const grid = document.getElementById('sportsCalendar');
+  if (!grid) return;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = today();
+
+  const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+  let html = weekdays.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+
+  for (let i = 0; i < offset; i++) html += '<div class="cal-cell empty"></div>';
+
+  let monthCheckedDays = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const checked = !!data[ds];
+    if (checked) monthCheckedDays++;
+    let cls = 'cal-cell';
+    if (checked) cls += ' checked';
+    if (ds === todayStr) cls += ' today';
+    html += `<div class="${cls}" title="${ds}: ${checked ? '已打卡' : '未打卡'}">${d}</div>`;
   }
-  document.getElementById('sportsCalendar').innerHTML = html;
+
+  grid.innerHTML = html;
+
+  // Year total
+  let yearCheckedDays = 0;
+  Object.keys(data).forEach(date => {
+    if (date.startsWith(String(year)) && data[date]) yearCheckedDays++;
+  });
+
+  const summary = document.getElementById('sportsCalSummary');
+  if (summary) {
+    summary.innerHTML = `
+      <div class="sum-item"><span class="sum-num">${monthCheckedDays}</span><span class="sum-label">本月打卡天数</span></div>
+      <div class="sum-item"><span class="sum-num">${yearCheckedDays}</span><span class="sum-label">全年打卡总天数</span></div>
+    `;
+  }
 }
 
 // ====== 10. 每周复盘 ======
