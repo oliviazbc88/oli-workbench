@@ -1248,12 +1248,18 @@ body::after {
           <input type="number" id="budgetCredit" placeholder="0.00" step="0.01" onchange="saveBudget()">
           <span style="color:var(--text-muted)">元</span>
         </div>
+        <div class="acct-row">
+          <span class="acct-label">⚠️ 大额支出</span>
+          <input type="number" id="budgetBigExpense" placeholder="0.00" step="0.01" onchange="saveBudget()">
+          <span style="color:var(--text-muted)">元</span>
+        </div>
         <div class="acct-row" style="flex-direction:column;align-items:stretch;gap:6px">
           <span class="acct-label" style="width:auto">📝 大额支出备注</span>
           <textarea id="budgetNotes" placeholder="记录大额支出明细..." rows="3" style="resize:vertical;border:1px solid var(--border);border-radius:var(--radius-xs);padding:8px;font-family:var(--font);font-size:0.85rem;outline:none" onchange="saveBudget()"></textarea>
         </div>
-        <div class="acct-summary">
-          本月合计：<span id="budgetTotal" style="font-size:1.1rem">¥0.00</span>
+        <div class="acct-summary" style="display:flex;flex-direction:column;gap:4px">
+          <div>本月合计：<span id="budgetTotal" style="font-size:1.1rem">¥0.00</span></div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">年度累计：<span id="budgetYearTotal">¥0.00</span></div>
         </div>
       </div>
     </section>
@@ -2246,11 +2252,12 @@ function renderBudget() {
   document.getElementById('budgetMonthSub').textContent = `${mk.replace('-', '年')}月`;
 
   const budgets = storageGet('monthly_budgets', {});
-  const b = budgets[mk] || { huabei: '', wechat: '', credit: '', notes: '' };
+  const b = budgets[mk] || { huabei: '', wechat: '', credit: '', bigExpense: '', notes: '' };
 
   document.getElementById('budgetHuabei').value = b.huabei || '';
   document.getElementById('budgetWechat').value = b.wechat || '';
   document.getElementById('budgetCredit').value = b.credit || '';
+  document.getElementById('budgetBigExpense').value = b.bigExpense || '';
   document.getElementById('budgetNotes').value = b.notes || '';
 
   updateBudgetTotal();
@@ -2264,6 +2271,7 @@ function saveBudget() {
     huabei: document.getElementById('budgetHuabei').value,
     wechat: document.getElementById('budgetWechat').value,
     credit: document.getElementById('budgetCredit').value,
+    bigExpense: document.getElementById('budgetBigExpense').value,
     notes: document.getElementById('budgetNotes').value
   };
 
@@ -2275,8 +2283,21 @@ function updateBudgetTotal() {
   const h = parseFloat(document.getElementById('budgetHuabei').value) || 0;
   const w = parseFloat(document.getElementById('budgetWechat').value) || 0;
   const c = parseFloat(document.getElementById('budgetCredit').value) || 0;
-  const total = h + w + c;
+  const be = parseFloat(document.getElementById('budgetBigExpense').value) || 0;
+  const total = h + w + c + be;
   document.getElementById('budgetTotal').textContent = `¥${total.toFixed(2)}`;
+
+  // Calculate yearly total
+  const year = new Date().getFullYear();
+  const budgets = storageGet('monthly_budgets', {});
+  let yearTotal = 0;
+  Object.keys(budgets).forEach(key => {
+    if (key.startsWith(String(year))) {
+      const b = budgets[key];
+      yearTotal += (parseFloat(b.huabei) || 0) + (parseFloat(b.wechat) || 0) + (parseFloat(b.credit) || 0) + (parseFloat(b.bigExpense) || 0);
+    }
+  });
+  document.getElementById('budgetYearTotal').textContent = `¥${yearTotal.toFixed(2)}`;
 }
 
 // ====== 12. Better Me ======
