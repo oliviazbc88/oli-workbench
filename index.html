@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="奥莉冰">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7ecba1">
+<title>奥莉冰 · WorkBuddy</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="cat-icon-192.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+/* ====== CSS Variables & Theme ====== */
+:root {
+  --primary: #7ecba1;
+  --primary-light: #b2e4c8;
+  --primary-dark: #5aad82;
+  --primary-bg: #f0faf4;
+  --primary-bg2: #e6f7ed;
+  --cat-pink: #f8c8d4;
+  --cat-dark: #4a6b5a;
+  --bg: #f9fbfa;
+  --card: #ffffff;
+  --text: #2c3e2e;
+  --text-light: #6b8a75;
+  --text-muted: #9ab5a3;
+  --border: #dce8e0;
+  --shadow: 0 2px 12px rgba(126, 203, 161, 0.12);
+  --shadow-lg: 0 8px 30px rgba(126, 203, 161, 0.15);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --sidebar-w: 260px;
+  --header-h: 60px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+}
+
+/* ====== Reset ====== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ====== Cat Background Pattern ====== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(126,203,161,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 85% 75%, rgba(178,228,200,0.08) 0%, transparent 45%),
+    radial-gradient(circle at 30% 60%, rgba(248,200,212,0.05) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Cat paw print SVG pattern */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='%237ecba1' opacity='0.04'%3E%3Ccircle cx='35' cy='45' r='6'/%3E%3Ccircle cx='55' cy='35' r='6'/%3E%3Ccircle cx='55' cy='55' r='6'/%3E%3Ccircle cx='75' cy='45' r='6'/%3E%3Cellipse cx='55' cy='70' rx='14' ry='10'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ====== Layout ====== */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ====== Sidebar ====== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: linear-gradient(180deg, #ffffff 0%, #f6fdf8 100%);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  transition: transform var(--transition);
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+.sidebar-header {
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.sidebar-cat {
+  font-size: 36px;
+  filter: drop-shadow(0 2px 4px rgba(126,203,161,0.3));
+  animation: catBounce 3s ease-in-out infinite;
+}
+
+@keyframes catBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.sidebar-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  letter-spacing: 2px;
+}
+
+.sidebar-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 0;
+  overflow-y: auto;
+}
+
+.nav-section {
+  margin-bottom: 4px;
+}
+
+.nav-section-title {
+  padding: 10px 20px 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-section-title .nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+  border-left: 3px solid transparent;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+}
+
+.nav-item.active {
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+  font-weight: 600;
+  border-left-color: var(--primary);
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sidebar-footer .cat-small {
+  font-size: 20px;
+}
+
+/* ====== Main Content ====== */
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  padding: 20px 24px 40px;
+  min-height: 100vh;
+}
+
+/* ====== Top Bar (Mobile) ====== */
+.mobile-topbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(249, 251, 250, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-menu-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--primary-bg);
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-dark);
+}
+
+.mobile-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ====== Overlay ====== */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 99;
+}
+
+/* ====== Page Sections ====== */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cat-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-header .subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ====== Cards ====== */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  transition: box-shadow var(--transition);
+}
+
+.card:hover { box-shadow: var(--shadow-lg); }
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cat-dark);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title .icon { font-size: 1.2rem; }
+
+/* ====== Progress Bar ====== */
+.progress-wrap {
+  margin-bottom: 10px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  color: var(--text-light);
+}
+
+.progress-label .pct {
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.progress-bar {
+  height: 8px;
+  background: var(--primary-bg2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-light), var(--primary));
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+/* ====== Checkbox ====== */
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--primary-bg2);
+}
+
+.todo-item:last-child { border-bottom: none; }
+
+.todo-check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  font-size: 12px;
+  color: transparent;
+}
+
+.todo-check.done {
+  background: var(--primary);
+  color: #fff;
+}
+
+.todo-text {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.todo-text.done {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.todo-delete {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all var(--transition);
+}
+
+.todo-item:hover .todo-delete { opacity: 1; }
+.todo-delete:hover { background: #fee2e2; color: #e74c3c; }
+
+/* ====== Input ====== */
+.input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-group input, .input-group textarea {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color var(--transition);
+  outline: none;
+}
+
+.input-group input:focus, .input-group textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(126,203,161,0.1);
+}
+
+.btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--primary);
+  color: var(--primary-dark);
+}
+.btn-outline:hover { background: var(--primary-bg); }
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  border-radius: var(--radius-xs);
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: #e74c3c;
+}
+.btn-danger:hover { background: #fecaca; }
+
+/* ====== Timer ====== */
+.timer-display {
+  font-size: 3rem;
+  font-weight: 300;
+  text-align: center;
+  color: var(--primary-dark);
+  font-variant-numeric: tabular-nums;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  margin: 12px 0;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ====== Calendar Heatmap ====== */
+.cal-heatmap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 10px;
+}
+
+.cal-day {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--primary-bg2);
+  transition: all var(--transition);
+  cursor: pointer;
+  position: relative;
+}
+
+.cal-day.studied { background: var(--primary); }
+.cal-day.today { border: 2px solid var(--primary-dark); }
+
+/* ====== Tab Switcher ====== */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--primary-bg2);
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: all var(--transition);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-family: var(--font);
+}
+
+.tab-btn.active {
+  color: var(--primary-dark);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ====== News Card ====== */
+.news-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--primary-bg2);
+}
+
+.news-item:last-child { border-bottom: none; }
+
+.news-item .news-source {
+  font-size: 0.7rem;
+  color: var(--primary);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.news-item .news-title {
+  font-size: 0.88rem;
+  margin: 2px 0;
+  line-height: 1.4;
+}
+
+.news-item .news-title a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.news-item .news-title a:hover { color: var(--primary-dark); }
+
+.news-item .news-time {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ====== Weekly Review Grid ====== */
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.review-cell {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.review-cell h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-cell textarea {
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 10px;
+  font-size: 0.85rem;
+  font-family: var(--font);
+  resize: vertical;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.review-cell textarea:focus { border-color: var(--primary); }
+
+/* ====== Accounting ====== */
+.acct-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--primary-bg2);
+}
+
+.acct-row .acct-label {
+  width: 70px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cat-dark);
+  flex-shrink: 0;
+}
+
+.acct-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 0.85rem;
+  outline: none;
+  font-family: var(--font);
+}
+
+.acct-row input:focus { border-color: var(--primary); }
+
+.acct-summary {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  text-align: right;
+  margin-top: 10px;
+}
+
+/* ====== Better Me ====== */
+.betterme-quote {
+  text-align: center;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, var(--primary-bg), var(--primary-bg2));
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.betterme-quote .quote-cn {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--cat-dark);
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.betterme-quote .quote-en {
+  font-size: 0.9rem;
+  color: var(--primary-dark);
+  font-style: italic;
+}
+
+.betterme-journal {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 0.9rem;
+  font-family: var(--font);
+  resize: vertical;
+  outline: none;
+}
+
+.betterme-journal:focus { border-color: var(--primary); }
+
+/* ====== Inspiration Notes ====== */
+.note-card {
+  background: linear-gradient(135deg, #fdfcf0, #fef9e7);
+  border: 1px solid #f0e6c0;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.note-card .note-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.note-card .note-text {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #5a4a2c;
+}
+
+.note-card .note-delete {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #c9b96e;
+  font-size: 14px;
+}
+
+/* ====== Week Selector ====== */
+.week-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.week-selector select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  background: #fff;
+  color: var(--text);
+  outline: none;
+}
+
+.week-selector .week-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+/* ====== WeRead Link ====== */
+.weread-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border-radius: 20px;
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all var(--transition);
+  margin-bottom: 12px;
+}
+
+.weread-link:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46,125,50,0.15); }
+
+/* ====== Grid Layouts ====== */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay.show { display: block; }
+  .main-content {
+    margin-left: 0;
+    padding: 14px 12px 30px;
+  }
+  .mobile-topbar { display: flex; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .review-grid { grid-template-columns: 1fr; }
+  .section-header h1 { font-size: 1.2rem; }
+}
+
+/* ====== Utility ====== */
+.text-center { text-align: center; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+/* Cat animation */
+.cat-paw {
+  display: inline-block;
+  animation: pawTap 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes pawTap {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--primary-bg2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="cat-icon-192.png" class="sidebar-cat" alt="小黑猫" style="width:42px;height:42px;border-radius:50%;object-fit:cover;box-shadow:0 2px 8px rgba(126,203,161,0.3)">
+        <span class="sidebar-title">奥莉冰</span>
+      </div>
+      <div class="sidebar-subtitle">✦ WorkBuddy 工作台 ✦</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- Section 1: 目标与规划 -->
+      <div class="nav-section">
+        <div class="nav-section-title"><span class="nav-dot"></span>目标与规划</div>
+        <a class="nav-item active" data-page="yearly-plan" onclick="navigateTo('yearly-plan', this)">
+          <span class="nav-icon">🎯</span>年度计划
+        </a>
+        <a class="nav-item" data-page="daily-plan" onclick="navigateTo('daily-plan', this)">
+          <span class="nav-icon">📋</span>每日计划
+        </a>
+        <a class="nav-item" data-page="reading-plan" onclick="navigateTo('reading-plan', this)">
+          <span class="nav-icon">📚</span>阅读计划
+        </a>
+      </div>
+
+      <!-- Section 2: 输入与学习 -->
+      <div class="nav-section">
+        <div class="nav-section-title"><span class="nav-dot"></span>输入与学习</div>
+        <a class="nav-item" data-page="english" onclick="navigateTo('english', this)">
+          <span class="nav-icon">🇬🇧</span>英语学习
+        </a>
+        <a class="nav-item" data-page="spanish" onclick="navigateTo('spanish', this)">
+          <span class="nav-icon">🇪🇸</span>西班牙语学习
+        </a>
+        <a class="nav-item" data-page="book-notes" onclick="navigateTo('book-notes', this)">
+          <span class="nav-icon">📖</span>读书笔记
+        </a>
+        <a class="nav-item" data-page="daily-news" onclick="navigateTo('daily-news', this)">
+          <span class="nav-icon">📰</span>每日新闻
+        </a>
+      </div>
+
+      <!-- Section 3: 输出与创作 -->
+      <div class="nav-section">
+        <div class="nav-section-title"><span class="nav-dot"></span>输出与创作</div>
+        <a class="nav-item" data-page="inspiration" onclick="navigateTo('inspiration', this)">
+          <span class="nav-icon">💡</span>灵感捕捉
+        </a>
+        <a class="nav-item" data-page="sports" onclick="navigateTo('sports', this)">
+          <span class="nav-icon">🏃</span>运动打卡
+        </a>
+      </div>
+
+      <!-- Section 4: 记录与复盘 -->
+      <div class="nav-section">
+        <div class="nav-section-title"><span class="nav-dot"></span>记录与复盘</div>
+        <a class="nav-item" data-page="weekly-review" onclick="navigateTo('weekly-review', this)">
+          <span class="nav-icon">🔄</span>每周复盘
+        </a>
+        <a class="nav-item" data-page="monthly-budget" onclick="navigateTo('monthly-budget', this)">
+          <span class="nav-icon">💰</span>每月记账
+        </a>
+        <a class="nav-item" data-page="better-me" onclick="navigateTo('better-me', this)">
+          <span class="nav-icon">✨</span>Better Me
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <img src="cat-icon-192.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="">
+      <span id="sidebarDate"></span>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Mobile Top Bar -->
+    <div class="mobile-topbar">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="mobile-title"><img src="cat-icon-192.png" style="width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px" alt="">奥莉冰</div>
+      <div style="width:36px"></div>
+    </div>
+
+    <!-- ========== 年度计划 ========== -->
+    <section class="page-section active" id="page-yearly-plan">
+      <div class="section-header">
+        <h1>🎯 年度计划</h1>
+        <div class="subtitle">设定年度目标，追踪完成进度</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📌</span>2026 年度目标</div>
+        <div id="yearlyGoals"></div>
+        <div class="mt-12">
+          <div class="input-group">
+            <input type="text" id="yearlyGoalInput" placeholder="添加年度目标..." onkeypress="if(event.key==='Enter')addYearlyGoal()">
+            <button class="btn btn-primary" onclick="addYearlyGoal()">添加</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 每日计划 ========== -->
+    <section class="page-section" id="page-daily-plan">
+      <div class="section-header">
+        <h1>📋 每日计划</h1>
+        <div class="subtitle" id="dailyDateSub"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">✅</span>今日待办</div>
+        <div id="dailyTodos"></div>
+        <div class="mt-12">
+          <div class="input-group">
+            <input type="text" id="dailyTodoInput" placeholder="添加今日任务..." onkeypress="if(event.key==='Enter')addDailyTodo()">
+            <button class="btn btn-primary" onclick="addDailyTodo()">添加</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 阅读计划 ========== -->
+    <section class="page-section" id="page-reading-plan">
+      <div class="section-header">
+        <h1>📚 阅读计划</h1>
+        <div class="subtitle">记录阅读目标与进度</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📖</span>书单与进度</div>
+        <div id="readingList"></div>
+        <div class="mt-12">
+          <div class="input-group">
+            <input type="text" id="readingBookInput" placeholder="书名">
+            <input type="number" id="readingPagesInput" placeholder="总页数" style="width:80px;flex:none" min="1">
+            <button class="btn btn-primary" onclick="addReadingBook()">添加</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 英语学习 ========== -->
+    <section class="page-section" id="page-english">
+      <div class="section-header">
+        <h1>🇬🇧 英语学习</h1>
+        <div class="subtitle">听力 · 课本 · 口语 全面突破</div>
+      </div>
+      <div class="tabs" id="englishTabs">
+        <button class="tab-btn active" onclick="switchEnglishTab('listening', this)">🎧 听力</button>
+        <button class="tab-btn" onclick="switchEnglishTab('textbook', this)">📕 课本</button>
+        <button class="tab-btn" onclick="switchEnglishTab('speaking', this)">🗣️ 口语</button>
+      </div>
+      <!-- Timer -->
+      <div class="card mb-12">
+        <div class="card-title"><span class="icon">⏱️</span>学习计时器</div>
+        <div class="timer-display" id="englishTimer">00:00:00</div>
+        <div class="timer-controls">
+          <button class="btn btn-primary" id="englishTimerBtn" onclick="toggleEnglishTimer()">开始</button>
+          <button class="btn btn-outline" onclick="resetEnglishTimer()">重置</button>
+        </div>
+        <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="englishTodayTime">0分钟</span></div>
+      </div>
+      <!-- Calendar -->
+      <div class="card mb-12">
+        <div class="card-title"><span class="icon">📅</span>打卡记录</div>
+        <div class="cal-heatmap" id="englishCalendar"></div>
+      </div>
+      <!-- Tab Contents -->
+      <div class="tab-content active" id="englishTab-listening">
+        <div class="card">
+          <div class="card-title"><span class="icon">🎧</span>TED 跟读材料</div>
+          <div id="englishTedList"></div>
+          <div class="mt-12">
+            <div class="input-group">
+              <input type="text" id="englishTedInput" placeholder="添加TED标题或链接..." onkeypress="if(event.key==='Enter')addEnglishTed()">
+              <button class="btn btn-primary" onclick="addEnglishTed()">添加</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🎤</span>周韵采访跟读</div>
+          <div id="englishInterviewList"></div>
+          <div class="mt-12">
+            <div class="input-group">
+              <input type="text" id="englishInterviewInput" placeholder="添加跟读材料..." onkeypress="if(event.key==='Enter')addEnglishInterview()">
+              <button class="btn btn-primary" onclick="addEnglishInterview()">添加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="englishTab-textbook">
+        <div class="card">
+          <div class="card-title"><span class="icon">📕</span>课本进度</div>
+          <div id="englishTextbookList"></div>
+          <div class="mt-12">
+            <div class="input-group">
+              <input type="text" id="englishTextbookInput" placeholder="添加课本单元..." onkeypress="if(event.key==='Enter')addEnglishTextbook()">
+              <button class="btn btn-primary" onclick="addEnglishTextbook()">添加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="englishTab-speaking">
+        <div class="card">
+          <div class="card-title"><span class="icon">🗣️</span>口语练习</div>
+          <div id="englishSpeakingList"></div>
+          <div class="mt-12">
+            <div class="input-group">
+              <input type="text" id="englishSpeakingInput" placeholder="添加口语主题..." onkeypress="if(event.key==='Enter')addEnglishSpeaking()">
+              <button class="btn btn-primary" onclick="addEnglishSpeaking()">添加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 西班牙语学习 ========== -->
+    <section class="page-section" id="page-spanish">
+      <div class="section-header">
+        <h1>🇪🇸 西班牙语学习</h1>
+        <div class="subtitle">¡Ánimo! 每天进步一点点</div>
+      </div>
+      <div class="tabs" id="spanishTabs">
+        <button class="tab-btn active" onclick="switchSpanishTab('listening', this)">🎧 听力</button>
+        <button class="tab-btn" onclick="switchSpanishTab('textbook', this)">📕 课本</button>
+        <button class="tab-btn" onclick="switchSpanishTab('speaking', this)">🗣️ 口语</button>
+      </div>
+      <div class="card mb-12">
+        <div class="card-title"><span class="icon">⏱️</span>学习计时器</div>
+        <div class="timer-display" id="spanishTimer">00:00:00</div>
+        <div class="timer-controls">
+          <button class="btn btn-primary" id="spanishTimerBtn" onclick="toggleSpanishTimer()">开始</button>
+          <button class="btn btn-outline" onclick="resetSpanishTimer()">重置</button>
+        </div>
+        <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="spanishTodayTime">0分钟</span></div>
+      </div>
+      <div class="card mb-12">
+        <div class="card-title"><span class="icon">📅</span>打卡记录</div>
+        <div class="cal-heatmap" id="spanishCalendar"></div>
+      </div>
+      <div class="tab-content active" id="spanishTab-listening">
+        <div class="card">
+          <div class="card-title"><span class="icon">🎧</span>听力材料</div>
+          <div id="spanishListeningList"></div>
+          <div class="mt-12">
+            <div class="input-group">
+              <input type="text" id="spanishListeningInput" placeholder="添加听力材料..." onkeypress="if(event.key==='Enter')addSpanishListening()">
+              <button class="btn btn-primary" onclick="addSpanishListening()">添加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="spanishTab-textbook">
+        <div class="card">
+          <div class="card-title"><span class="icon">📕</span>课本进度</div>
+          <div id="spanishTextbookList"></div>
+          <div class="mt-12">
+            <div class="input-group">
+              <input type="text" id="spanishTextbookInput" placeholder="添加课本单元..." onkeypress="if(event.key==='Enter')addSpanishTextbook()">
+              <button class="btn btn-primary" onclick="addSpanishTextbook()">添加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="spanishTab-speaking">
+        <div class="card">
+          <div class="card-title"><span class="icon">🗣️</span>口语练习</div>
+          <div id="spanishSpeakingList"></div>
+          <div class="mt-12">
+            <div class="input-group">
+              <input type="text" id="spanishSpeakingInput" placeholder="添加口语主题..." onkeypress="if(event.key==='Enter')addSpanishSpeaking()">
+              <button class="btn btn-primary" onclick="addSpanishSpeaking()">添加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 读书笔记 ========== -->
+    <section class="page-section" id="page-book-notes">
+      <div class="section-header">
+        <h1>📖 读书笔记</h1>
+        <div class="subtitle">记录阅读感悟，链接微信读书</div>
+      </div>
+      <div class="card mb-12">
+        <a class="weread-link" href="https://weread.qq.com" target="_blank" rel="noopener">
+          📱 打开微信读书 →
+        </a>
+        <div class="card-title"><span class="icon">📝</span>笔记列表</div>
+        <div id="bookNotesList"></div>
+        <div class="mt-12">
+          <div class="input-group" style="flex-direction:column;gap:8px">
+            <input type="text" id="bookNoteTitle" placeholder="书名 / 章节">
+            <textarea id="bookNoteContent" placeholder="写下你的读书笔记..." rows="3" style="resize:vertical"></textarea>
+            <button class="btn btn-primary" onclick="addBookNote()" style="align-self:flex-start">保存笔记</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 每日新闻 ========== -->
+    <section class="page-section" id="page-daily-news">
+      <div class="section-header">
+        <h1>📰 每日新闻</h1>
+        <div class="subtitle" id="newsDateSub"></div>
+      </div>
+      <div class="card" id="newsContainer">
+        <div class="text-center" style="padding:40px">
+          <div class="spinner"></div>
+          <p style="margin-top:12px;color:var(--text-muted)">正在加载新闻...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 灵感捕捉 ========== -->
+    <section class="page-section" id="page-inspiration">
+      <div class="section-header">
+        <h1>💡 灵感捕捉</h1>
+        <div class="subtitle">抓住每一个闪念</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">✨</span>灵感便签</div>
+        <div id="inspirationNotes"></div>
+        <div class="mt-12">
+          <div class="input-group" style="flex-direction:column;gap:8px">
+            <textarea id="inspirationInput" placeholder="写下你的灵感..." rows="3" style="resize:vertical"></textarea>
+            <button class="btn btn-primary" onclick="addInspiration()" style="align-self:flex-start">捕捉灵感</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 运动打卡 ========== -->
+    <section class="page-section" id="page-sports">
+      <div class="section-header">
+        <h1>🏃 运动打卡</h1>
+        <div class="subtitle">Keep moving!</div>
+      </div>
+      <div class="card mb-12">
+        <div class="card-title"><span class="icon">🔥</span>今日运动</div>
+        <div class="grid-2">
+          <div style="text-align:center;padding:16px">
+            <div style="font-size:2.5rem;font-weight:300;color:var(--primary-dark)" id="sportsStreak">0</div>
+            <div style="font-size:0.8rem;color:var(--text-muted)">连续打卡天数</div>
+          </div>
+          <div style="text-align:center;padding:16px">
+            <div style="font-size:2.5rem;font-weight:300;color:var(--primary-dark)" id="sportsThisMonth">0</div>
+            <div style="font-size:0.8rem;color:var(--text-muted)">本月打卡天数</div>
+          </div>
+        </div>
+        <div class="text-center mt-12">
+          <button class="btn btn-primary" id="sportsCheckBtn" onclick="toggleSportsCheck()" style="font-size:1rem;padding:12px 32px">
+            ✅ 今日打卡
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📅</span>打卡日历</div>
+        <div class="cal-heatmap" id="sportsCalendar"></div>
+      </div>
+    </section>
+
+    <!-- ========== 每周复盘 ========== -->
+    <section class="page-section" id="page-weekly-review">
+      <div class="section-header">
+        <h1>🔄 每周复盘</h1>
+        <div class="subtitle">回顾 · 反思 · 成长</div>
+      </div>
+      <div class="card mb-12">
+        <div class="week-selector">
+          <span class="week-label">📅 选择周：</span>
+          <select id="reviewWeekSelect" onchange="loadReviewWeek()"></select>
+        </div>
+        <div class="review-grid">
+          <div class="review-cell">
+            <h4>✅ 完成了什么</h4>
+            <textarea id="reviewDone" placeholder="这周完成了哪些事情？"></textarea>
+          </div>
+          <div class="review-cell">
+            <h4>🚧 问题 & 阻碍</h4>
+            <textarea id="reviewBlockers" placeholder="遇到了什么问题？"></textarea>
+          </div>
+          <div class="review-cell">
+            <h4>💪 下周改进</h4>
+            <textarea id="reviewImprove" placeholder="下周可以怎样做得更好？"></textarea>
+          </div>
+          <div class="review-cell">
+            <h4>🌟 高光时刻</h4>
+            <textarea id="reviewHighlight" placeholder="这周最值得记住的瞬间？"></textarea>
+          </div>
+        </div>
+        <div class="mt-12 text-center">
+          <button class="btn btn-primary" onclick="saveReview()">💾 保存复盘</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 每月记账 ========== -->
+    <section class="page-section" id="page-monthly-budget">
+      <div class="section-header">
+        <h1>💰 每月记账</h1>
+        <div class="subtitle" id="budgetMonthSub"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">💳</span>账单明细</div>
+        <div class="acct-row">
+          <span class="acct-label">💳 花呗</span>
+          <input type="number" id="budgetHuabei" placeholder="0.00" step="0.01" onchange="saveBudget()">
+          <span style="color:var(--text-muted)">元</span>
+        </div>
+        <div class="acct-row">
+          <span class="acct-label">💚 微信</span>
+          <input type="number" id="budgetWechat" placeholder="0.00" step="0.01" onchange="saveBudget()">
+          <span style="color:var(--text-muted)">元</span>
+        </div>
+        <div class="acct-row">
+          <span class="acct-label">🏦 信用卡</span>
+          <input type="number" id="budgetCredit" placeholder="0.00" step="0.01" onchange="saveBudget()">
+          <span style="color:var(--text-muted)">元</span>
+        </div>
+        <div class="acct-row" style="flex-direction:column;align-items:stretch;gap:6px">
+          <span class="acct-label" style="width:auto">📝 大额支出备注</span>
+          <textarea id="budgetNotes" placeholder="记录大额支出明细..." rows="3" style="resize:vertical;border:1px solid var(--border);border-radius:var(--radius-xs);padding:8px;font-family:var(--font);font-size:0.85rem;outline:none" onchange="saveBudget()"></textarea>
+        </div>
+        <div class="acct-summary">
+          本月合计：<span id="budgetTotal" style="font-size:1.1rem">¥0.00</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Better Me ========== -->
+    <section class="page-section" id="page-better-me">
+      <div class="section-header">
+        <h1>✨ Better Me</h1>
+        <div class="subtitle">每日激励 · 成为更好的自己</div>
+      </div>
+      <div class="betterme-quote" id="betterMeQuote">
+        <div class="quote-cn">每一天都是一个新的开始，用微笑迎接阳光。</div>
+        <div class="quote-en">Every day is a fresh start. Greet the sunshine with a smile.</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📓</span>今日心情 / 日记</div>
+        <textarea class="betterme-journal" id="betterMeJournal" placeholder="今天想对自己说些什么？" onchange="saveBetterMe()"></textarea>
+        <div class="mt-8" style="font-size:0.75rem;color:var(--text-muted);text-align:right">自动保存 ✦</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+
+<script>
+// ==============================
+// 奥莉冰 · WorkBuddy 核心逻辑
+// ==============================
+
+const STORAGE_KEY = 'oli_workbench_';
+
+// ====== Utils ======
+function today() { return new Date().toISOString().split('T')[0]; }
+function now() { return new Date(); }
+function fmtDate(d) { const dd = new Date(d); return `${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`; }
+function fmtDateCN(d) { const dd = new Date(d); return `${dd.getFullYear()}年${dd.getMonth()+1}月${dd.getDate()}日`; }
+function getMonthKey() { const d = now(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+
+function storageGet(key, fallback) {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY + key);
+    return v ? JSON.parse(v) : fallback;
+  } catch(e) { return fallback; }
+}
+function storageSet(key, val) {
+  localStorage.setItem(STORAGE_KEY + key, JSON.stringify(val));
+}
+
+// Daily reset check
+function checkDailyReset() {
+  const lastDate = storageGet('last_date', '');
+  const t = today();
+  if (lastDate !== t) {
+    // Reset daily data
+    storageSet('daily_todos', []);
+    storageSet('english_timer_secs', 0);
+    storageSet('spanish_timer_secs', 0);
+    storageSet('sports_today', false);
+    storageSet('betterme_journal', '');
+    storageSet('last_date', t);
+    // Save yesterday's English time to calendar
+    if (lastDate) {
+      const engSecs = storageGet('english_timer_secs_yesterday', 0);
+      const spaSecs = storageGet('spanish_timer_secs_yesterday', 0);
+      if (engSecs > 0) {
+        const cal = storageGet('english_calendar', {});
+        cal[lastDate] = Math.round(engSecs / 60);
+        storageSet('english_calendar', cal);
+      }
+      if (spaSecs > 0) {
+        const cal = storageGet('spanish_calendar', {});
+        cal[lastDate] = Math.round(spaSecs / 60);
+        storageSet('spanish_calendar', cal);
+      }
+    }
+    // Update sports streak
+    updateSportsStreak();
+    return true;
+  }
+  return false;
+}
+
+// ====== Navigation ======
+function navigateTo(page, el) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  if (el) el.classList.add('active');
+
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
+
+  // Trigger page-specific refresh
+  refreshPage(page);
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+}
+
+function refreshPage(page) {
+  switch(page) {
+    case 'yearly-plan': renderYearlyGoals(); break;
+    case 'daily-plan': renderDailyTodos(); break;
+    case 'reading-plan': renderReadingList(); break;
+    case 'english': renderEnglish(); break;
+    case 'spanish': renderSpanish(); break;
+    case 'book-notes': renderBookNotes(); break;
+    case 'daily-news': loadNews(); break;
+    case 'inspiration': renderInspiration(); break;
+    case 'sports': renderSports(); break;
+    case 'weekly-review': initReviewWeek(); break;
+    case 'monthly-budget': renderBudget(); break;
+    case 'better-me': renderBetterMe(); break;
+  }
+}
+
+// ====== 1. 年度计划 ======
+function addYearlyGoal() {
+  const input = document.getElementById('yearlyGoalInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const goals = storageGet('yearly_goals', []);
+  goals.push({ id: Date.now(), text, done: false });
+  storageSet('yearly_goals', goals);
+  input.value = '';
+  renderYearlyGoals();
+}
+
+function toggleYearlyGoal(id) {
+  const goals = storageGet('yearly_goals', []);
+  const g = goals.find(g => g.id === id);
+  if (g) g.done = !g.done;
+  storageSet('yearly_goals', goals);
+  renderYearlyGoals();
+}
+
+function deleteYearlyGoal(id) {
+  let goals = storageGet('yearly_goals', []);
+  goals = goals.filter(g => g.id !== id);
+  storageSet('yearly_goals', goals);
+  renderYearlyGoals();
+}
+
+function renderYearlyGoals() {
+  const goals = storageGet('yearly_goals', []);
+  const total = goals.length;
+  const done = goals.filter(g => g.done).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  let html = '';
+  if (total > 0) {
+    html += `<div class="progress-wrap">
+      <div class="progress-label"><span>年度完成进度</span><span class="pct">${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  goals.forEach(g => {
+    html += `<div class="todo-item">
+      <div class="todo-check ${g.done ? 'done' : ''}" onclick="toggleYearlyGoal(${g.id})">${g.done ? '✓' : ''}</div>
+      <span class="todo-text ${g.done ? 'done' : ''}">${escapeHtml(g.text)}</span>
+      <button class="todo-delete" onclick="deleteYearlyGoal(${g.id})">✕</button>
+    </div>`;
+  });
+
+  if (!goals.length) {
+    html = '<p style="text-align:center;color:var(--text-muted);padding:20px">🐾 还没有年度目标，快来添加吧~</p>';
+  }
+
+  document.getElementById('yearlyGoals').innerHTML = html;
+}
+
+// ====== 2. 每日计划 ======
+function addDailyTodo() {
+  const input = document.getElementById('dailyTodoInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const todos = storageGet('daily_todos', []);
+  todos.push({ id: Date.now(), text, done: false });
+  storageSet('daily_todos', todos);
+  input.value = '';
+  renderDailyTodos();
+}
+
+function toggleDailyTodo(id) {
+  const todos = storageGet('daily_todos', []);
+  const t = todos.find(t => t.id === id);
+  if (t) t.done = !t.done;
+  storageSet('daily_todos', todos);
+  renderDailyTodos();
+}
+
+function deleteDailyTodo(id) {
+  let todos = storageGet('daily_todos', []);
+  todos = todos.filter(t => t.id !== id);
+  storageSet('daily_todos', todos);
+  renderDailyTodos();
+}
+
+function renderDailyTodos() {
+  const todos = storageGet('daily_todos', []);
+  const total = todos.length;
+  const done = todos.filter(t => t.done).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('dailyDateSub').textContent = fmtDateCN(today());
+
+  let html = '';
+  if (total > 0) {
+    html += `<div class="progress-wrap">
+      <div class="progress-label"><span>今日完成进度</span><span class="pct">${done}/${total} · ${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  todos.forEach(t => {
+    html += `<div class="todo-item">
+      <div class="todo-check ${t.done ? 'done' : ''}" onclick="toggleDailyTodo(${t.id})">${t.done ? '✓' : ''}</div>
+      <span class="todo-text ${t.done ? 'done' : ''}">${escapeHtml(t.text)}</span>
+      <button class="todo-delete" onclick="deleteDailyTodo(${t.id})">✕</button>
+    </div>`;
+  });
+
+  if (!todos.length) {
+    html = '<p style="text-align:center;color:var(--text-muted);padding:20px">📋 新的一天，规划你的任务吧~</p>';
+  }
+
+  document.getElementById('dailyTodos').innerHTML = html;
+}
+
+// ====== 3. 阅读计划 ======
+function addReadingBook() {
+  const nameInput = document.getElementById('readingBookInput');
+  const pagesInput = document.getElementById('readingPagesInput');
+  const name = nameInput.value.trim();
+  const pages = parseInt(pagesInput.value) || 0;
+  if (!name || pages <= 0) return;
+  const books = storageGet('reading_books', []);
+  books.push({ id: Date.now(), name, totalPages: pages, readPages: 0, done: false });
+  storageSet('reading_books', books);
+  nameInput.value = '';
+  pagesInput.value = '';
+  renderReadingList();
+}
+
+function updateReadingPages(id, readPages) {
+  const books = storageGet('reading_books', []);
+  const b = books.find(b => b.id === id);
+  if (b) {
+    b.readPages = Math.min(parseInt(readPages) || 0, b.totalPages);
+    b.done = b.readPages >= b.totalPages;
+  }
+  storageSet('reading_books', books);
+  renderReadingList();
+}
+
+function toggleReadingDone(id) {
+  const books = storageGet('reading_books', []);
+  const b = books.find(b => b.id === id);
+  if (b) {
+    b.done = !b.done;
+    if (b.done) b.readPages = b.totalPages;
+    else if (b.readPages >= b.totalPages) b.readPages = b.totalPages - 1;
+  }
+  storageSet('reading_books', books);
+  renderReadingList();
+}
+
+function deleteReadingBook(id) {
+  let books = storageGet('reading_books', []);
+  books = books.filter(b => b.id !== id);
+  storageSet('reading_books', books);
+  renderReadingList();
+}
+
+function renderReadingList() {
+  const books = storageGet('reading_books', []);
+  let html = '';
+  books.forEach(b => {
+    const pct = Math.round((b.readPages / b.totalPages) * 100);
+    html += `<div style="margin-bottom:14px">
+      <div class="flex-between mb-8">
+        <span style="font-weight:600;font-size:0.9rem">${escapeHtml(b.name)}</span>
+        <span style="font-size:0.8rem;color:var(--text-muted)">${b.readPages}/${b.totalPages} 页</span>
+      </div>
+      <div class="progress-bar mb-8"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" value="${b.readPages}" min="0" max="${b.totalPages}" style="width:70px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-xs);font-size:0.8rem" onchange="updateReadingPages(${b.id}, this.value)">
+        <span style="font-size:0.8rem;color:var(--text-muted)">/ ${b.totalPages}</span>
+        <div class="todo-check ${b.done ? 'done' : ''}" onclick="toggleReadingDone(${b.id})" style="margin-left:auto">${b.done ? '✓' : ''}</div>
+        <button class="todo-delete" onclick="deleteReadingBook(${b.id})" style="opacity:1">✕</button>
+      </div>
+    </div>`;
+  });
+  if (!books.length) {
+    html = '<p style="text-align:center;color:var(--text-muted);padding:20px">📚 添加想读的书，追踪阅读进度~</p>';
+  }
+  document.getElementById('readingList').innerHTML = html;
+}
+
+// ====== 4. 英语学习 ======
+let englishTimerInterval = null;
+let englishTimerRunning = false;
+
+function getEnglishSeconds() { return storageGet('english_timer_secs', 0); }
+function setEnglishSeconds(s) { storageSet('english_timer_secs', s); storageSet('english_timer_secs_yesterday', s); }
+
+function updateEnglishTimerDisplay() {
+  const s = getEnglishSeconds();
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  document.getElementById('englishTimer').textContent =
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  document.getElementById('englishTodayTime').textContent = `${Math.floor(s / 60)}分钟`;
+}
+
+function toggleEnglishTimer() {
+  if (englishTimerRunning) {
+    clearInterval(englishTimerInterval);
+    englishTimerRunning = false;
+    document.getElementById('englishTimerBtn').textContent = '继续';
+    document.getElementById('englishTimerBtn').classList.remove('btn-primary');
+    document.getElementById('englishTimerBtn').classList.add('btn-outline');
+  } else {
+    englishTimerInterval = setInterval(() => {
+      setEnglishSeconds(getEnglishSeconds() + 1);
+      updateEnglishTimerDisplay();
+    }, 1000);
+    englishTimerRunning = true;
+    document.getElementById('englishTimerBtn').textContent = '暂停';
+    document.getElementById('englishTimerBtn').classList.add('btn-primary');
+    document.getElementById('englishTimerBtn').classList.remove('btn-outline');
+  }
+}
+
+function resetEnglishTimer() {
+  clearInterval(englishTimerInterval);
+  englishTimerRunning = false;
+  setEnglishSeconds(0);
+  updateEnglishTimerDisplay();
+  document.getElementById('englishTimerBtn').textContent = '开始';
+  document.getElementById('englishTimerBtn').classList.add('btn-primary');
+  document.getElementById('englishTimerBtn').classList.remove('btn-outline');
+}
+
+function renderEnglishCalendar() {
+  const cal = storageGet('english_calendar', {});
+  const days = 90; // Show last 90 days
+  let html = '';
+  const t = today();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = fmtDate(d);
+    const mins = cal[ds] || 0;
+    let cls = '';
+    if (ds === t) cls = 'today';
+    if (mins > 0) cls += ' studied';
+    const title = `${ds}: ${mins}分钟`;
+    html += `<div class="cal-day ${cls}" title="${title}"></div>`;
+  }
+  document.getElementById('englishCalendar').innerHTML = html;
+}
+
+function switchEnglishTab(tab, btn) {
+  document.querySelectorAll('#englishTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#page-english .tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('englishTab-' + tab).classList.add('active');
+}
+
+// English TED
+function addEnglishTed() {
+  const input = document.getElementById('englishTedInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const list = storageGet('english_ted', []);
+  list.push({ id: Date.now(), text, done: false });
+  storageSet('english_ted', list);
+  input.value = '';
+  renderEnglishTed();
+}
+
+function toggleEnglishTed(id) {
+  const list = storageGet('english_ted', []);
+  const item = list.find(i => i.id === id);
+  if (item) item.done = !item.done;
+  storageSet('english_ted', list);
+  renderEnglishTed();
+}
+
+function deleteEnglishTed(id) {
+  let list = storageGet('english_ted', []);
+  list = list.filter(i => i.id !== id);
+  storageSet('english_ted', list);
+  renderEnglishTed();
+}
+
+function renderEnglishTed() {
+  const list = storageGet('english_ted', []);
+  let html = '';
+  list.forEach(item => {
+    html += `<div class="todo-item">
+      <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishTed(${item.id})">${item.done ? '✓' : ''}</div>
+      <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      <button class="todo-delete" onclick="deleteEnglishTed(${item.id})">✕</button>
+    </div>`;
+  });
+  if (!list.length) html = '<p style="text-align:center;color:var(--text-muted);padding:16px">🎧 添加TED演讲练习~</p>';
+  document.getElementById('englishTedList').innerHTML = html;
+}
+
+// English Interview
+function addEnglishInterview() {
+  const input = document.getElementById('englishInterviewInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const list = storageGet('english_interview', []);
+  list.push({ id: Date.now(), text, done: false });
+  storageSet('english_interview', list);
+  input.value = '';
+  renderEnglishInterview();
+}
+
+function toggleEnglishInterview(id) {
+  const list = storageGet('english_interview', []);
+  const item = list.find(i => i.id === id);
+  if (item) item.done = !item.done;
+  storageSet('english_interview', list);
+  renderEnglishInterview();
+}
+
+function deleteEnglishInterview(id) {
+  let list = storageGet('english_interview', []);
+  list = list.filter(i => i.id !== id);
+  storageSet('english_interview', list);
+  renderEnglishInterview();
+}
+
+function renderEnglishInterview() {
+  const list = storageGet('english_interview', []);
+  let html = '';
+  list.forEach(item => {
+    html += `<div class="todo-item">
+      <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishInterview(${item.id})">${item.done ? '✓' : ''}</div>
+      <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      <button class="todo-delete" onclick="deleteEnglishInterview(${item.id})">✕</button>
+    </div>`;
+  });
+  if (!list.length) html = '<p style="text-align:center;color:var(--text-muted);padding:16px">🎤 添加周韵采访跟读材料~</p>';
+  document.getElementById('englishInterviewList').innerHTML = html;
+}
+
+// English Textbook
+function addEnglishTextbook() {
+  const input = document.getElementById('englishTextbookInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const list = storageGet('english_textbook', []);
+  list.push({ id: Date.now(), text, done: false });
+  storageSet('english_textbook', list);
+  input.value = '';
+  renderEnglishTextbook();
+}
+
+function toggleEnglishTextbook(id) {
+  const list = storageGet('english_textbook', []);
+  const item = list.find(i => i.id === id);
+  if (item) item.done = !item.done;
+  storageSet('english_textbook', list);
+  renderEnglishTextbook();
+}
+
+function deleteEnglishTextbook(id) {
+  let list = storageGet('english_textbook', []);
+  list = list.filter(i => i.id !== id);
+  storageSet('english_textbook', list);
+  renderEnglishTextbook();
+}
+
+function renderEnglishTextbook() {
+  const list = storageGet('english_textbook', []);
+  let html = '';
+  list.forEach(item => {
+    html += `<div class="todo-item">
+      <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishTextbook(${item.id})">${item.done ? '✓' : ''}</div>
+      <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      <button class="todo-delete" onclick="deleteEnglishTextbook(${item.id})">✕</button>
+    </div>`;
+  });
+  if (!list.length) html = '<p style="text-align:center;color:var(--text-muted);padding:16px">📕 添加课本单元进度~</p>';
+  document.getElementById('englishTextbookList').innerHTML = html;
+}
+
+// English Speaking
+function addEnglishSpeaking() {
+  const input = document.getElementById('englishSpeakingInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const list = storageGet('english_speaking', []);
+  list.push({ id: Date.now(), text, done: false });
+  storageSet('english_speaking', list);
+  input.value = '';
+  renderEnglishSpeaking();
+}
+
+function toggleEnglishSpeaking(id) {
+  const list = storageGet('english_speaking', []);
+  const item = list.find(i => i.id === id);
+  if (item) item.done = !item.done;
+  storageSet('english_speaking', list);
+  renderEnglishSpeaking();
+}
+
+function deleteEnglishSpeaking(id) {
+  let list = storageGet('english_speaking', []);
+  list = list.filter(i => i.id !== id);
+  storageSet('english_speaking', list);
+  renderEnglishSpeaking();
+}
+
+function renderEnglishSpeaking() {
+  const list = storageGet('english_speaking', []);
+  let html = '';
+  list.forEach(item => {
+    html += `<div class="todo-item">
+      <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishSpeaking(${item.id})">${item.done ? '✓' : ''}</div>
+      <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      <button class="todo-delete" onclick="deleteEnglishSpeaking(${item.id})">✕</button>
+    </div>`;
+  });
+  if (!list.length) html = '<p style="text-align:center;color:var(--text-muted);padding:16px">🗣️ 添加口语练习主题~</p>';
+  document.getElementById('englishSpeakingList').innerHTML = html;
+}
+
+function renderEnglish() {
+  updateEnglishTimerDisplay();
+  renderEnglishCalendar();
+  renderEnglishTed();
+  renderEnglishInterview();
+  renderEnglishTextbook();
+  renderEnglishSpeaking();
+}
+
+// ====== 5. 西班牙语学习 ======
+let spanishTimerInterval = null;
+let spanishTimerRunning = false;
+
+function getSpanishSeconds() { return storageGet('spanish_timer_secs', 0); }
+function setSpanishSeconds(s) { storageSet('spanish_timer_secs', s); storageSet('spanish_timer_secs_yesterday', s); }
+
+function updateSpanishTimerDisplay() {
+  const s = getSpanishSeconds();
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  document.getElementById('spanishTimer').textContent =
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  document.getElementById('spanishTodayTime').textContent = `${Math.floor(s / 60)}分钟`;
+}
+
+function toggleSpanishTimer() {
+  if (spanishTimerRunning) {
+    clearInterval(spanishTimerInterval);
+    spanishTimerRunning = false;
+    document.getElementById('spanishTimerBtn').textContent = '继续';
+    document.getElementById('spanishTimerBtn').classList.remove('btn-primary');
+    document.getElementById('spanishTimerBtn').classList.add('btn-outline');
+  } else {
+    spanishTimerInterval = setInterval(() => {
+      setSpanishSeconds(getSpanishSeconds() + 1);
+      updateSpanishTimerDisplay();
+    }, 1000);
+    spanishTimerRunning = true;
+    document.getElementById('spanishTimerBtn').textContent = '暂停';
+    document.getElementById('spanishTimerBtn').classList.add('btn-primary');
+    document.getElementById('spanishTimerBtn').classList.remove('btn-outline');
+  }
+}
+
+function resetSpanishTimer() {
+  clearInterval(spanishTimerInterval);
+  spanishTimerRunning = false;
+  setSpanishSeconds(0);
+  updateSpanishTimerDisplay();
+  document.getElementById('spanishTimerBtn').textContent = '开始';
+  document.getElementById('spanishTimerBtn').classList.add('btn-primary');
+  document.getElementById('spanishTimerBtn').classList.remove('btn-outline');
+}
+
+function renderSpanishCalendar() {
+  const cal = storageGet('spanish_calendar', {});
+  const days = 90;
+  let html = '';
+  const t = today();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = fmtDate(d);
+    const mins = cal[ds] || 0;
+    let cls = '';
+    if (ds === t) cls = 'today';
+    if (mins > 0) cls += ' studied';
+    const title = `${ds}: ${mins}分钟`;
+    html += `<div class="cal-day ${cls}" title="${title}"></div>`;
+  }
+  document.getElementById('spanishCalendar').innerHTML = html;
+}
+
+function switchSpanishTab(tab, btn) {
+  document.querySelectorAll('#spanishTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#page-spanish .tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('spanishTab-' + tab).classList.add('active');
+}
+
+// Spanish helpers
+function renderSpanishList(key, listId) {
+  const list = storageGet(key, []);
+  let html = '';
+  list.forEach(item => {
+    html += `<div class="todo-item">
+      <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleSpanishItem('${key}',${item.id})">${item.done ? '✓' : ''}</div>
+      <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      <button class="todo-delete" onclick="deleteSpanishItem('${key}',${item.id})">✕</button>
+    </div>`;
+  });
+  if (!list.length) html = '<p style="text-align:center;color:var(--text-muted);padding:16px">📝 暂无内容，快来添加吧~</p>';
+  document.getElementById(listId).innerHTML = html;
+}
+
+function toggleSpanishItem(key, id) {
+  const list = storageGet(key, []);
+  const item = list.find(i => i.id === id);
+  if (item) item.done = !item.done;
+  storageSet(key, list);
+  renderSpanish();
+}
+
+function deleteSpanishItem(key, id) {
+  let list = storageGet(key, []);
+  list = list.filter(i => i.id !== id);
+  storageSet(key, list);
+  renderSpanish();
+}
+
+function addSpanishItem(key, inputId) {
+  const input = document.getElementById(inputId);
+  const text = input.value.trim();
+  if (!text) return;
+  const list = storageGet(key, []);
+  list.push({ id: Date.now(), text, done: false });
+  storageSet(key, list);
+  input.value = '';
+  renderSpanish();
+}
+
+function addSpanishListening() { addSpanishItem('spanish_listening', 'spanishListeningInput'); }
+function addSpanishTextbook() { addSpanishItem('spanish_textbook', 'spanishTextbookInput'); }
+function addSpanishSpeaking() { addSpanishItem('spanish_speaking', 'spanishSpeakingInput'); }
+
+function renderSpanish() {
+  updateSpanishTimerDisplay();
+  renderSpanishCalendar();
+  renderSpanishList('spanish_listening', 'spanishListeningList');
+  renderSpanishList('spanish_textbook', 'spanishTextbookList');
+  renderSpanishList('spanish_speaking', 'spanishSpeakingList');
+}
+
+// ====== 6. 读书笔记 ======
+function addBookNote() {
+  const titleEl = document.getElementById('bookNoteTitle');
+  const contentEl = document.getElementById('bookNoteContent');
+  const title = titleEl.value.trim();
+  const content = contentEl.value.trim();
+  if (!title || !content) return;
+  const notes = storageGet('book_notes', []);
+  notes.unshift({ id: Date.now(), title, content, date: today() });
+  storageSet('book_notes', notes);
+  titleEl.value = '';
+  contentEl.value = '';
+  renderBookNotes();
+}
+
+function deleteBookNote(id) {
+  let notes = storageGet('book_notes', []);
+  notes = notes.filter(n => n.id !== id);
+  storageSet('book_notes', notes);
+  renderBookNotes();
+}
+
+function renderBookNotes() {
+  const notes = storageGet('book_notes', []);
+  let html = '';
+  notes.forEach(n => {
+    html += `<div class="note-card">
+      <div class="note-time">📖 ${escapeHtml(n.title)} · ${n.date}</div>
+      <div class="note-text">${escapeHtml(n.content).replace(/\n/g, '<br>')}</div>
+      <button class="note-delete" onclick="deleteBookNote(${n.id})">✕</button>
+    </div>`;
+  });
+  if (!notes.length) {
+    html = '<p style="text-align:center;color:var(--text-muted);padding:20px">📖 还没有读书笔记，开始记录吧~</p>';
+  }
+  document.getElementById('bookNotesList').innerHTML = html;
+}
+
+// ====== 7. 每日新闻 ======
+const newsData = {
+  domestic: [
+    { title: '上半年我国GDP同比增长5.0%，经济运行总体平稳', source: '新华社', time: '2小时前' },
+    { title: '国产大模型密集发布，AI应用加速落地', source: '科技日报', time: '3小时前' },
+    { title: '多地推出促消费新政，暑期经济持续升温', source: '经济日报', time: '4小时前' },
+  ],
+  international: [
+    { title: 'Global markets rally as inflation concerns ease', source: 'Reuters', time: '2h ago' },
+    { title: 'UN climate report calls for urgent action on emissions', source: 'BBC', time: '4h ago' },
+    { title: 'Tech giants announce new AI safety consortium', source: 'TechCrunch', time: '5h ago' },
+    { title: 'Olympic preparations enter final phase in host city', source: 'AP News', time: '6h ago' },
+  ],
+  tech: [
+    { title: '开源大模型性能再创新高，逼近闭源模型水平', source: '机器之心', time: '1小时前' },
+    { title: 'Apple unveils new AI features at developer conference', source: 'The Verge', time: '3h ago' },
+  ]
+};
+
+function loadNews() {
+  document.getElementById('newsDateSub').textContent = fmtDateCN(today());
+  const container = document.getElementById('newsContainer');
+
+  let html = '';
+
+  // Domestic
+  html += '<div class="card-title"><span class="icon">🇨🇳</span>国内新闻</div>';
+  newsData.domestic.forEach(n => {
+    html += `<div class="news-item">
+      <div class="news-source">${n.source}</div>
+      <div class="news-title">${escapeHtml(n.title)}</div>
+      <div class="news-time">${n.time}</div>
+    </div>`;
+  });
+
+  // International
+  html += '<div class="card-title mt-16"><span class="icon">🌍</span>国际新闻</div>';
+  newsData.international.forEach(n => {
+    html += `<div class="news-item">
+      <div class="news-source">${n.source}</div>
+      <div class="news-title">${escapeHtml(n.title)}</div>
+      <div class="news-time">${n.time}</div>
+    </div>`;
+  });
+
+  // Tech
+  html += '<div class="card-title mt-16"><span class="icon">💻</span>科技动态</div>';
+  newsData.tech.forEach(n => {
+    html += `<div class="news-item">
+      <div class="news-source">${n.source}</div>
+      <div class="news-title">${escapeHtml(n.title)}</div>
+      <div class="news-time">${n.time}</div>
+    </div>`;
+  });
+
+  html += '<div style="text-align:center;margin-top:12px;font-size:0.75rem;color:var(--text-muted)">🔄 新闻每日更新</div>';
+
+  container.innerHTML = html;
+}
+
+// ====== 8. 灵感捕捉 ======
+function addInspiration() {
+  const input = document.getElementById('inspirationInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const notes = storageGet('inspirations', []);
+  notes.unshift({ id: Date.now(), text, date: today(), time: now().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) });
+  storageSet('inspirations', notes);
+  input.value = '';
+  renderInspiration();
+}
+
+function deleteInspiration(id) {
+  let notes = storageGet('inspirations', []);
+  notes = notes.filter(n => n.id !== id);
+  storageSet('inspirations', notes);
+  renderInspiration();
+}
+
+function renderInspiration() {
+  const notes = storageGet('inspirations', []);
+  let html = '';
+  notes.forEach(n => {
+    html += `<div class="note-card">
+      <div class="note-time">💡 ${n.date} ${n.time}</div>
+      <div class="note-text">${escapeHtml(n.text).replace(/\n/g, '<br>')}</div>
+      <button class="note-delete" onclick="deleteInspiration(${n.id})">✕</button>
+    </div>`;
+  });
+  if (!notes.length) {
+    html = '<p style="text-align:center;color:var(--text-muted);padding:20px">💡 灵感一闪而过，快捕捉它~</p>';
+  }
+  document.getElementById('inspirationNotes').innerHTML = html;
+}
+
+// ====== 9. 运动打卡 ======
+function getSportsData() {
+  return storageGet('sports_data', {});
+}
+
+function toggleSportsCheck() {
+  const t = today();
+  const data = getSportsData();
+  if (data[t]) {
+    delete data[t];
+    storageSet('sports_data', data);
+    storageSet('sports_today', false);
+  } else {
+    data[t] = true;
+    storageSet('sports_data', data);
+    storageSet('sports_today', true);
+  }
+  updateSportsStreak();
+  renderSports();
+}
+
+function updateSportsStreak() {
+  const data = getSportsData();
+  let streak = 0;
+  const d = new Date();
+  // If not checked in today, check from yesterday
+  const checkedToday = data[today()];
+  if (!checkedToday) {
+    d.setDate(d.getDate() - 1);
+  }
+  while (true) {
+    const ds = fmtDate(d);
+    if (data[ds]) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  storageSet('sports_streak', streak);
+
+  // This month count
+  const mk = getMonthKey();
+  let monthCount = 0;
+  Object.keys(data).forEach(ds => {
+    if (ds.startsWith(mk) && data[ds]) monthCount++;
+  });
+  storageSet('sports_month_count', monthCount);
+}
+
+function renderSports() {
+  const data = getSportsData();
+  const checkedToday = !!data[today()];
+  const streak = storageGet('sports_streak', 0);
+  const monthCount = storageGet('sports_month_count', 0);
+
+  document.getElementById('sportsStreak').textContent = streak;
+  document.getElementById('sportsThisMonth').textContent = monthCount;
+
+  const btn = document.getElementById('sportsCheckBtn');
+  if (checkedToday) {
+    btn.textContent = '✅ 已打卡（取消）';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-outline');
+  } else {
+    btn.textContent = '✅ 今日打卡';
+    btn.classList.add('btn-primary');
+    btn.classList.remove('btn-outline');
+  }
+
+  // Calendar
+  const days = 90;
+  let html = '';
+  const t = today();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = fmtDate(d);
+    let cls = '';
+    if (ds === t) cls = 'today';
+    if (data[ds]) cls += ' studied';
+    html += `<div class="cal-day ${cls}" title="${ds}: ${data[ds] ? '已打卡' : '未打卡'}"></div>`;
+  }
+  document.getElementById('sportsCalendar').innerHTML = html;
+}
+
+// ====== 10. 每周复盘 ======
+function getWeekKey(d) {
+  // ISO week: week starts Monday
+  const date = new Date(d);
+  const day = date.getDay() || 7; // Make Sunday = 7
+  date.setDate(date.getDate() - day + 1); // Go to Monday
+  return fmtDate(date);
+}
+
+function getWeekRange(weekKey) {
+  const d = new Date(weekKey + 'T00:00:00');
+  const end = new Date(d);
+  end.setDate(end.getDate() + 6);
+  return `${fmtDateCN(d)} ~ ${fmtDateCN(end)}`;
+}
+
+function getAllWeeks() {
+  // Generate all weeks for current year + last year's Dec
+  const weeks = [];
+  const now = new Date();
+  // Start from first Monday of last year
+  const start = new Date(now.getFullYear() - 1, 0, 1);
+  while (start.getDay() !== 1) start.setDate(start.getDate() + 1); // Go to Monday
+
+  const end = new Date(now);
+  end.setDate(end.getDate() + 7); // Include next week
+
+  let d = new Date(start);
+  while (d <= end) {
+    const wk = getWeekKey(d);
+    if (!weeks.includes(wk)) weeks.push(wk);
+    d.setDate(d.getDate() + 7);
+  }
+  return weeks;
+}
+
+function initReviewWeek() {
+  const weeks = getAllWeeks();
+  const currentWeek = getWeekKey(today());
+  const select = document.getElementById('reviewWeekSelect');
+
+  select.innerHTML = '';
+  // Show most recent weeks first
+  const reversed = [...weeks].reverse();
+  reversed.forEach(wk => {
+    const opt = document.createElement('option');
+    opt.value = wk;
+    opt.textContent = getWeekRange(wk);
+    if (wk === currentWeek) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  loadReviewWeek();
+}
+
+function loadReviewWeek() {
+  const wk = document.getElementById('reviewWeekSelect').value;
+  const reviews = storageGet('weekly_reviews', {});
+  const r = reviews[wk] || { done: '', blockers: '', improve: '', highlight: '' };
+
+  document.getElementById('reviewDone').value = r.done || '';
+  document.getElementById('reviewBlockers').value = r.blockers || '';
+  document.getElementById('reviewImprove').value = r.improve || '';
+  document.getElementById('reviewHighlight').value = r.highlight || '';
+}
+
+function saveReview() {
+  const wk = document.getElementById('reviewWeekSelect').value;
+  const reviews = storageGet('weekly_reviews', {});
+
+  reviews[wk] = {
+    done: document.getElementById('reviewDone').value,
+    blockers: document.getElementById('reviewBlockers').value,
+    improve: document.getElementById('reviewImprove').value,
+    highlight: document.getElementById('reviewHighlight').value,
+    savedAt: new Date().toISOString()
+  };
+
+  storageSet('weekly_reviews', reviews);
+  alert('✅ 复盘已保存！');
+}
+
+// ====== 11. 每月记账 ======
+function renderBudget() {
+  const mk = getMonthKey();
+  document.getElementById('budgetMonthSub').textContent = `${mk.replace('-', '年')}月`;
+
+  const budgets = storageGet('monthly_budgets', {});
+  const b = budgets[mk] || { huabei: '', wechat: '', credit: '', notes: '' };
+
+  document.getElementById('budgetHuabei').value = b.huabei || '';
+  document.getElementById('budgetWechat').value = b.wechat || '';
+  document.getElementById('budgetCredit').value = b.credit || '';
+  document.getElementById('budgetNotes').value = b.notes || '';
+
+  updateBudgetTotal();
+}
+
+function saveBudget() {
+  const mk = getMonthKey();
+  const budgets = storageGet('monthly_budgets', {});
+
+  budgets[mk] = {
+    huabei: document.getElementById('budgetHuabei').value,
+    wechat: document.getElementById('budgetWechat').value,
+    credit: document.getElementById('budgetCredit').value,
+    notes: document.getElementById('budgetNotes').value
+  };
+
+  storageSet('monthly_budgets', budgets);
+  updateBudgetTotal();
+}
+
+function updateBudgetTotal() {
+  const h = parseFloat(document.getElementById('budgetHuabei').value) || 0;
+  const w = parseFloat(document.getElementById('budgetWechat').value) || 0;
+  const c = parseFloat(document.getElementById('budgetCredit').value) || 0;
+  const total = h + w + c;
+  document.getElementById('budgetTotal').textContent = `¥${total.toFixed(2)}`;
+}
+
+// ====== 12. Better Me ======
+const dailyQuotes = [
+  { cn: '每一天都是一个新的开始，用微笑迎接阳光。', en: 'Every day is a fresh start. Greet the sunshine with a smile.' },
+  { cn: '不积跬步，无以至千里；不积小流，无以成江海。', en: 'A journey of a thousand miles begins with a single step.' },
+  { cn: '你今天的努力，是未来惊喜的铺垫。', en: "Today's effort is tomorrow's surprise in the making." },
+  { cn: '做自己的光，不需要太亮，够温暖就好。', en: 'Be your own light — it need not be blinding, just warm enough.' },
+  { cn: '成长就是一次次突破自己的舒适区。', en: 'Growth happens when you step outside your comfort zone.' },
+  { cn: '种一棵树最好的时间是十年前，其次是现在。', en: 'The best time to plant a tree was 20 years ago. The second best time is now.' },
+  { cn: '人生没有白走的路，每一步都算数。', en: 'No step in life is wasted — every one counts.' },
+  { cn: '今天也是元气满满的一天呢！🐱', en: 'Another day full of energy and possibility! 🐱' },
+  { cn: '慢慢来，比较快。', en: 'Slow is smooth, smooth is fast.' },
+  { cn: '你所热爱的，就是你的生活。', en: 'What you love is what your life is made of.' },
+  { cn: '勇敢不是不害怕，而是害怕的时候还在前行。', en: 'Courage is not the absence of fear, but moving forward despite it.' },
+  { cn: '微小的坚持，终将汇成巨大的改变。', en: 'Small daily improvements are the key to staggering long-term results.' },
+  { cn: '心怀浪漫宇宙，也珍惜人间日常。', en: 'Keep a romantic universe in your heart while cherishing everyday moments.' },
+  { cn: '今天比昨天好，这就是希望。', en: 'Being better than yesterday — that is hope.' },
+];
+
+function getDailyQuote() {
+  const stored = storageGet('daily_quote', null);
+  const t = today();
+
+  if (stored && stored.date === t) {
+    return stored;
+  }
+
+  // Pick a new random quote
+  const idx = Math.floor(Math.random() * dailyQuotes.length);
+  const quote = { date: t, ...dailyQuotes[idx] };
+  storageSet('daily_quote', quote);
+  return quote;
+}
+
+function renderBetterMe() {
+  const quote = getDailyQuote();
+  document.getElementById('betterMeQuote').innerHTML = `
+    <div class="quote-cn">${escapeHtml(quote.cn)}</div>
+    <div class="quote-en">${escapeHtml(quote.en)}</div>
+  `;
+
+  const journal = storageGet('betterme_journal', '');
+  document.getElementById('betterMeJournal').value = journal;
+}
+
+function saveBetterMe() {
+  storageSet('betterme_journal', document.getElementById('betterMeJournal').value);
+}
+
+// ====== Utility ======
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ====== Init ======
+function init() {
+  checkDailyReset();
+
+  // Set sidebar date
+  document.getElementById('sidebarDate').textContent = fmtDateCN(today());
+
+  // Render current page
+  renderYearlyGoals();
+  renderDailyTodos();
+
+  // Load initial page
+  refreshPage('yearly-plan');
+}
+
+// Run on load
+document.addEventListener('DOMContentLoaded', init);
+
+// Auto-save better me journal periodically
+setInterval(() => {
+  const el = document.getElementById('betterMeJournal');
+  if (el && document.getElementById('page-better-me').classList.contains('active')) {
+    saveBetterMe();
+  }
+}, 5000);
+
+// Save budget on page leave
+window.addEventListener('beforeunload', () => {
+  if (document.getElementById('page-monthly-budget').classList.contains('active')) {
+    saveBudget();
+  }
+});
+</script>
+</body>
+</html>
