@@ -1138,7 +1138,7 @@ body::after {
           <button class="btn btn-outline" onclick="resetEnglishTimer()">重置</button>
           <button class="btn btn-danger btn-sm" id="englishTimerStop" onclick="stopEnglishTimer()" style="display:none">⏹ 结束计时</button>
         </div>
-        <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="englishTodayTime">0分钟</span></div>
+        <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="englishTodayTime">0分钟</span>　|　本月累计：<span id="englishMonthTime">0分钟</span></div>
       </div>
       <!-- Calendar -->
       <div class="card mb-12">
@@ -1248,7 +1248,7 @@ body::after {
           <button class="btn btn-outline" onclick="resetSpanishTimer()">重置</button>
           <button class="btn btn-danger btn-sm" id="spanishTimerStop" onclick="stopSpanishTimer()" style="display:none">⏹ 结束计时</button>
         </div>
-        <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="spanishTodayTime">0分钟</span></div>
+        <div class="text-center mt-8" style="font-size:0.8rem;color:var(--text-muted)">今日累计：<span id="spanishTodayTime">0分钟</span>　|　本月累计：<span id="spanishMonthTime">0分钟</span></div>
       </div>
       <div class="card mb-12">
         <div class="card-title"><span class="icon">📅</span>打卡记录</div>
@@ -1868,6 +1868,16 @@ function renderReadingList() {
 })();
 
 // Helper to refresh timer displays safely (ignore if DOM not present)
+function calcMonthTotal(calendarKey) {
+  const cal = storageGet(calendarKey, {});
+  const mk = getMonthKey();
+  let total = 0;
+  Object.keys(cal).forEach(date => {
+    if (date.startsWith(mk)) total += (cal[date] || 0);
+  });
+  return total;
+}
+
 function refreshTimerDisplays() {
   const engEl = document.getElementById('englishTimer');
   if (engEl) {
@@ -1878,6 +1888,8 @@ function refreshTimerDisplays() {
     engEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
     const todayEl = document.getElementById('englishTodayTime');
     if (todayEl) todayEl.textContent = `${Math.floor(s / 60)}分钟`;
+    const monthEl = document.getElementById('englishMonthTime');
+    if (monthEl) monthEl.textContent = `${calcMonthTotal('english_calendar')}分钟`;
   }
   const spaEl = document.getElementById('spanishTimer');
   if (spaEl) {
@@ -1888,6 +1900,8 @@ function refreshTimerDisplays() {
     spaEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
     const todayEl = document.getElementById('spanishTodayTime');
     if (todayEl) todayEl.textContent = `${Math.floor(s / 60)}分钟`;
+    const monthEl = document.getElementById('spanishMonthTime');
+    if (monthEl) monthEl.textContent = `${calcMonthTotal('spanish_calendar')}分钟`;
   }
   // Update button states
   refreshTimerButtons();
