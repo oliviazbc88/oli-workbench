@@ -1146,8 +1146,43 @@ body::after {
       </div>
       <!-- Tab Contents -->
       <div class="tab-content active" id="englishTab-listening">
+        <!-- 每周推荐 -->
+        <div class="card mb-12" style="background:linear-gradient(135deg,#fdf8f0,#fef9e7);border-color:#f0e6c0">
+          <div class="card-title"><span class="icon">⭐</span>本周推荐 · TED & 邹韵跟读</div>
+          <div class="news-item">
+            <div class="news-source">🎧 TED 推荐</div>
+            <div class="news-title"><a href="https://www.ted.com/talks" target="_blank" rel="noopener">The most popular TED Talks — 每周精选英语演讲</a></div>
+            <div class="news-time">难度：中级 · 含中英字幕 · 适合影子跟读</div>
+          </div>
+          <div class="news-item">
+            <div class="news-source">🎤 邹韵 CGTN</div>
+            <div class="news-title"><a href="https://www.bilibili.com/video/BV19wgQ6FEEW/" target="_blank" rel="noopener">邹韵CGTN英语新闻播报 · 外交级英语语速</a></div>
+            <div class="news-time">难度：高级 · 跟读训练 · B站双语</div>
+          </div>
+          <div class="news-item">
+            <div class="news-source">📺 B站 TED合集</div>
+            <div class="news-title"><a href="https://www.bilibili.com/video/BV1xER1BgEn9/" target="_blank" rel="noopener">必看30场TED演讲合集 · 双语字幕+精读笔记</a></div>
+            <div class="news-time">难度：初/中级 · 重难点标注 · 30集</div>
+          </div>
+          <div class="news-item">
+            <div class="news-source">🎙️ 喜马拉雅</div>
+            <div class="news-title"><a href="https://www.ximalaya.com/album/122221774" target="_blank" rel="noopener">英语TED演讲 2025-2026 · 208集音频</a></div>
+            <div class="news-time">难度：初/中/高级 · 纯音频磨耳朵</div>
+          </div>
+          <div class="news-item">
+            <div class="news-source">🎤 邹韵采访合集</div>
+            <div class="news-title"><a href="https://www.zhihu.com/zvideo/1723728550472134656" target="_blank" rel="noopener">邹韵CGTN全英采访奥地利总统 · 雅思9分口语</a></div>
+            <div class="news-time">难度：高级 · 外交级口语范本</div>
+          </div>
+          <div class="news-item">
+            <div class="news-source">📱 跟读工具</div>
+            <div class="news-title"><a href="https://www.shadowpro.cn/" target="_blank" rel="noopener">ShadowPro 影子跟读 · AI英语口语学习平台</a></div>
+            <div class="news-time">推荐工具 · 视频跟读+AI纠音</div>
+          </div>
+          <div style="text-align:center;margin-top:8px;font-size:0.72rem;color:var(--text-muted)">🔄 每周更新 · 本周推荐：<span id="englishWeekLabel"></span></div>
+        </div>
         <div class="card">
-          <div class="card-title"><span class="icon">🎧</span>TED 跟读材料</div>
+          <div class="card-title"><span class="icon">📝</span>我的TED跟读清单</div>
           <div id="englishTedList"></div>
           <div class="mt-12">
             <div class="input-group">
@@ -1157,7 +1192,7 @@ body::after {
           </div>
         </div>
         <div class="card">
-          <div class="card-title"><span class="icon">🎤</span>周韵采访跟读</div>
+          <div class="card-title"><span class="icon">🎤</span>我的邹韵跟读清单</div>
           <div id="englishInterviewList"></div>
           <div class="mt-12">
             <div class="input-group">
@@ -2000,10 +2035,44 @@ function renderEnglishSpeaking() {
 function renderEnglish() {
   updateEnglishTimerDisplay();
   renderEnglishCalendar();
+  updateEnglishWeekLabel();
   renderEnglishTed();
   renderEnglishInterview();
   renderEnglishTextbook();
   renderEnglishSpeaking();
+}
+
+// ====== Weekly English Recommendations ======
+const englishWeeklyRecs = {
+  ted: [
+    { title: 'The most popular TED Talks — 每周精选英语演讲', url: 'https://www.ted.com/talks', desc: '难度：中级 · 含中英字幕 · 适合影子跟读' },
+    { title: '10 essential TED Talks of 2025', url: 'https://www.ted.com/playlists/891/10_essential_ted_talks_of_2025', desc: '难度：中级 · 2025年度精选10场' },
+    { title: 'TED Talks 必看30场合集 · 双语字幕+精读笔记', url: 'https://www.bilibili.com/video/BV1xER1BgEn9/', desc: '难度：初/中级 · 重难点标注 · 30集' },
+    { title: 'TED演讲 2025-2026 · 208集音频', url: 'https://www.ximalaya.com/album/122221774', desc: '难度：初/中/高级 · 纯音频磨耳朵' },
+  ],
+  zhouyun: [
+    { title: '邹韵CGTN英语新闻播报 · 外交级英语语速', url: 'https://www.bilibili.com/video/BV19wgQ6FEEW/', desc: '难度：高级 · 跟读训练 · B站双语' },
+    { title: '邹韵CGTN全英采访奥地利总统 · 雅思9分口语', url: 'https://www.zhihu.com/zvideo/1723728550472134656', desc: '难度：高级 · 外交级口语范本' },
+    { title: '邹韵全英新闻播报合集 · 抖音/B站', url: 'https://www.douyin.com/search/%E9%82%B9%E9%9F%B5%E5%85%A8%E8%8B%B1%E6%96%B0%E9%97%BB%E6%92%AD%E6%8A%A5%E5%90%88%E9%9B%86', desc: '难度：高级 · 合集持续更新' },
+    { title: '央视主持邹韵全英文采访李显龙', url: 'https://www.iqiyi.com/v_1oe6iqqyhkk.html', desc: '难度：高级 · 自信从容 流利口语' },
+  ],
+  tools: [
+    { title: 'ShadowPro 影子跟读 · AI英语口语学习平台', url: 'https://www.shadowpro.cn/', desc: '推荐工具 · 视频跟读+AI纠音' },
+    { title: 'ShadoVox · 影子跟读英语学习平台', url: 'https://shadovox.com/', desc: '推荐工具 · 句子级精细训练' },
+  ]
+};
+
+function getWeekNumber() {
+  const d = new Date();
+  const start = new Date(d.getFullYear(), 0, 1);
+  const days = Math.floor((d - start) / (24 * 60 * 60 * 1000));
+  return Math.ceil((days + start.getDay() + 1) / 7);
+}
+
+function updateEnglishWeekLabel() {
+  const weekNum = getWeekNumber();
+  const year = new Date().getFullYear();
+  document.getElementById('englishWeekLabel').textContent = `${year}年第${weekNum}周`;
 }
 
 // ====== 5. 西班牙语学习 ======
