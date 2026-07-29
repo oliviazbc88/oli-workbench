@@ -1145,6 +1145,17 @@ body::after {
         <div class="card-title"><span class="icon">📅</span>打卡记录</div>
         <div class="cal-heatmap" id="englishCalendar"></div>
       </div>
+      <!-- Daily Stats Table -->
+      <div class="card mb-12">
+        <div class="card-title"><span class="icon">📊</span>每日学习统计</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:0.82rem" id="englishStatsTable">
+            <thead><tr style="background:var(--primary-bg);color:var(--cat-dark)"><th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)">日期</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--border)">学习时长</th></tr></thead>
+            <tbody></tbody>
+            <tfoot><tr style="font-weight:700;color:var(--primary-dark)"><td style="padding:8px;border-top:2px solid var(--primary-light)">本月总计</td><td style="padding:8px;text-align:right;border-top:2px solid var(--primary-light)" id="englishStatsTotal">0分钟</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
       <!-- Tab Contents -->
       <div class="tab-content active" id="englishTab-listening">
         <!-- 每周推荐 -->
@@ -1253,6 +1264,17 @@ body::after {
       <div class="card mb-12">
         <div class="card-title"><span class="icon">📅</span>打卡记录</div>
         <div class="cal-heatmap" id="spanishCalendar"></div>
+      </div>
+      <!-- Daily Stats Table -->
+      <div class="card mb-12">
+        <div class="card-title"><span class="icon">📊</span>每日学习统计</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:0.82rem" id="spanishStatsTable">
+            <thead><tr style="background:var(--primary-bg);color:var(--cat-dark)"><th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)">日期</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--border)">学习时长</th></tr></thead>
+            <tbody></tbody>
+            <tfoot><tr style="font-weight:700;color:var(--primary-dark)"><td style="padding:8px;border-top:2px solid var(--primary-light)">本月总计</td><td style="padding:8px;text-align:right;border-top:2px solid var(--primary-light)" id="spanishStatsTotal">0分钟</td></tr></tfoot>
+          </table>
+        </div>
       </div>
       <div class="tab-content active" id="spanishTab-listening">
         <div class="card">
@@ -2062,6 +2084,38 @@ function renderEnglishCalendar() {
     html += `<div class="cal-day ${cls}" title="${title}"></div>`;
   }
   document.getElementById('englishCalendar').innerHTML = html;
+  renderEnglishStats();
+}
+
+function renderEnglishStats() {
+  const cal = storageGet('english_calendar', {});
+  const mk = getMonthKey();
+  let entries = [];
+  let total = 0;
+  Object.keys(cal).forEach(date => {
+    if (date.startsWith(mk)) {
+      entries.push({ date, mins: cal[date] });
+      total += cal[date] || 0;
+    }
+  });
+  entries.sort((a, b) => b.date.localeCompare(a.date)); // newest first
+
+  let html = '';
+  if (entries.length === 0) {
+    html = '<tr><td colspan="2" style="text-align:center;color:var(--text-muted);padding:16px">本月暂无打卡记录</td></tr>';
+  } else {
+    entries.forEach(e => {
+      const d = new Date(e.date + 'T00:00:00');
+      const dayNames = ['日','一','二','三','四','五','六'];
+      const weekDay = dayNames[d.getDay()];
+      html += `<tr style="border-bottom:1px solid var(--primary-bg2)">
+        <td style="padding:6px 8px">${e.date} 周${weekDay}</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:var(--primary-dark)">${e.mins} 分钟</td>
+      </tr>`;
+    });
+  }
+  document.querySelector('#englishStatsTable tbody').innerHTML = html;
+  document.getElementById('englishStatsTotal').textContent = `${total} 分钟`;
 }
 
 function switchEnglishTab(tab, btn) {
@@ -2295,6 +2349,38 @@ function renderSpanishCalendar() {
     html += `<div class="cal-day ${cls}" title="${title}"></div>`;
   }
   document.getElementById('spanishCalendar').innerHTML = html;
+  renderSpanishStats();
+}
+
+function renderSpanishStats() {
+  const cal = storageGet('spanish_calendar', {});
+  const mk = getMonthKey();
+  let entries = [];
+  let total = 0;
+  Object.keys(cal).forEach(date => {
+    if (date.startsWith(mk)) {
+      entries.push({ date, mins: cal[date] });
+      total += cal[date] || 0;
+    }
+  });
+  entries.sort((a, b) => b.date.localeCompare(a.date));
+
+  let html = '';
+  if (entries.length === 0) {
+    html = '<tr><td colspan="2" style="text-align:center;color:var(--text-muted);padding:16px">本月暂无打卡记录</td></tr>';
+  } else {
+    entries.forEach(e => {
+      const d = new Date(e.date + 'T00:00:00');
+      const dayNames = ['日','一','二','三','四','五','六'];
+      const weekDay = dayNames[d.getDay()];
+      html += `<tr style="border-bottom:1px solid var(--primary-bg2)">
+        <td style="padding:6px 8px">${e.date} 周${weekDay}</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;color:var(--primary-dark)">${e.mins} 分钟</td>
+      </tr>`;
+    });
+  }
+  document.querySelector('#spanishStatsTable tbody').innerHTML = html;
+  document.getElementById('spanishStatsTotal').textContent = `${total} 分钟`;
 }
 
 function switchSpanishTab(tab, btn) {
