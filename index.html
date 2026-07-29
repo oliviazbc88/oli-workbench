@@ -1294,19 +1294,37 @@ body::after {
     <section class="page-section" id="page-book-notes">
       <div class="section-header">
         <h1>📖 读书笔记</h1>
-        <div class="subtitle">记录阅读感悟，链接微信读书</div>
+        <div class="subtitle">记录阅读感悟，同步微信读书</div>
       </div>
-      <div class="card mb-12">
-        <a class="weread-link" href="https://weread.qq.com" target="_blank" rel="noopener">
-          📱 打开微信读书 →
-        </a>
-        <div class="card-title"><span class="icon">📝</span>笔记列表</div>
+
+      <!-- 微信读书快捷入口 -->
+      <div class="card mb-12" style="background:linear-gradient(135deg,#eff6ff,#e0f0ff);border-color:#bdd7f5">
+        <div class="card-title"><span class="icon">📱</span>微信读书 · 快捷入口</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <a class="weread-link" href="https://weread.qq.com/" target="_blank" rel="noopener" style="justify-content:center">
+            📚 微信读书首页
+          </a>
+          <a class="weread-link" href="https://weread.qq.com/web/shelf" target="_blank" rel="noopener" style="justify-content:center">
+            📖 我的书架
+          </a>
+          <a class="weread-link" href="https://weread.qq.com/web/note/list" target="_blank" rel="noopener" style="justify-content:center">
+            📝 笔记/划线
+          </a>
+          <a class="weread-link" href="https://weread.qq.com/web/book/list" target="_blank" rel="noopener" style="justify-content:center">
+            🔍 发现好书
+          </a>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:0.72rem;color:var(--text-muted)">💡 手机端建议使用微信读书App，网页版同步所有笔记和划线</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📝</span>我的笔记</div>
         <div id="bookNotesList"></div>
         <div class="mt-12">
           <div class="input-group" style="flex-direction:column;gap:8px">
             <input type="text" id="bookNoteTitle" placeholder="书名 / 章节">
             <textarea id="bookNoteContent" placeholder="写下你的读书笔记..." rows="3" style="resize:vertical"></textarea>
-            <button class="btn btn-primary" onclick="addBookNote()" style="align-self:flex-start">保存笔记</button>
+            <button class="btn btn-primary" onclick="addBookNote()" style="align-self:flex-start">💾 保存笔记</button>
           </div>
         </div>
       </div>
