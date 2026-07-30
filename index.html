@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="奥莉冰">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#7ecba1">
-<title>奥莉冰 · WorkBuddy v2.5</title>
+<title>奥莉冰 · WorkBuddy v2.6</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120.png">
 <link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152.png">
@@ -1331,8 +1331,8 @@ body::after {
     <div class="sidebar-footer">
       <img src="cat-icon-192.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="">
       <span id="sidebarDate"></span>
-      <span style="margin-left:auto;font-size:0.65rem;color:var(--primary)">v2.1</span>
-      <button onclick="exportAllData()" style="margin-left:4px;background:none;border:1px solid var(--primary);color:var(--primary);font-size:0.6rem;padding:2px 5px;border-radius:4px;cursor:pointer" title="导出数据">📤</button>
+      <span style="margin-left:auto;font-size:0.65rem;color:var(--primary)">v2.5</span>
+      <button onclick="quickBackup()" style="margin-left:4px;background:var(--primary);color:#fff;border:none;font-size:0.55rem;padding:3px 6px;border-radius:10px;cursor:pointer;font-weight:700" title="一键备份（下载+本地）">💾备份</button>
       <button onclick="document.getElementById('importFileInput').click()" style="margin-left:2px;background:none;border:1px solid var(--primary);color:var(--primary);font-size:0.6rem;padding:2px 5px;border-radius:4px;cursor:pointer" title="导入数据">📥</button>
       <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importAllData(this)">
     </div>
@@ -1876,6 +1876,134 @@ if ('serviceWorker' in navigator) {
 // ==============================
 
 const STORAGE_KEY = 'oli_workbench_';
+const BACKUP_KEY = 'oli_workbench_backup_';
+const BACKUP_VERSION_KEY = 'oli_backup_version';
+const CURRENT_VERSION = 'v2.5';
+
+// ====== 数据保护系统 ======
+// 自动备份：在页面加载时将当前所有数据备份
+function autoBackup() {
+  const backup = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    // 只备份业务数据，不备份备份本身
+    if (key.startsWith(STORAGE_KEY) && !key.startsWith(BACKUP_KEY)) {
+      try { backup[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+    }
+  }
+  const backupKey = BACKUP_KEY + today();
+  localStorage.setItem(backupKey, JSON.stringify(backup));
+  localStorage.setItem(BACKUP_VERSION_KEY, CURRENT_VERSION);
+  console.log('💾 自动备份完成: ' + today() + ' (' + Object.keys(backup).length + ' 条数据)');
+}
+
+// 恢复最新备份
+function restoreFromBackup() {
+  // 获取所有备份日期
+  const backups = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(BACKUP_KEY)) {
+      backups.push(key.replace(BACKUP_KEY, ''));
+    }
+  }
+  backups.sort().reverse(); // 最新的在前
+
+  if (backups.length === 0) return false;
+
+  // 检查当前是否有数据
+  let hasData = false;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(STORAGE_KEY) && !key.startsWith(BACKUP_KEY)) {
+      hasData = true;
+      break;
+    }
+  }
+
+  if (hasData) return false; // 已有数据，不需要恢复
+
+  // 数据丢失，尝试恢复最新备份
+  const latestBackup = BACKUP_KEY + backups[0];
+  try {
+    const data = JSON.parse(localStorage.getItem(latestBackup));
+    Object.entries(data).forEach(([key, val]) => {
+      localStorage.setItem(key, JSON.stringify(val));
+    });
+    console.log('🔄 数据已从备份恢复: ' + backups[0] + ' (' + Object.keys(data).length + ' 条)');
+    return true;
+  } catch(e) {
+    console.error('备份恢复失败:', e);
+    // 尝试次新备份
+    if (backups.length > 1) {
+      const secondBackup = BACKUP_KEY + backups[1];
+      try {
+        const data = JSON.parse(localStorage.getItem(secondBackup));
+        Object.entries(data).forEach(([key, val]) => {
+          localStorage.setItem(key, JSON.stringify(val));
+        });
+        console.log('🔄 数据已从次新备份恢复: ' + backups[1]);
+        return true;
+      } catch(e2) {}
+    }
+    return false;
+  }
+}
+
+// 手动一键备份（提供下载文件）
+function quickBackup() {
+  autoBackup();
+  const allData = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(STORAGE_KEY) && !key.startsWith(BACKUP_KEY)) {
+      try { allData[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+    }
+  }
+  const json = JSON.stringify(allData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `奥莉冰_完整备份_${today()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  showToast('✅ 备份成功！已下载文件 + 本地自动保存');
+}
+
+// Toast 提示
+function showToast(msg) {
+  let toast = document.getElementById('oliToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'oliToast';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#4a6b5a;color:#fff;padding:10px 24px;border-radius:20px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:opacity 0.3s;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+// 清理过期备份（保留最近7天）
+function cleanOldBackups() {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 7);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(BACKUP_KEY)) {
+      const dateStr = key.replace(BACKUP_KEY, '');
+      if (dateStr < cutoffStr) keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+  if (keysToRemove.length > 0) console.log('🧹 清理了 ' + keysToRemove.length + ' 个旧备份');
+}
 
 // ====== Utils ======
 function today() { return new Date().toISOString().split('T')[0]; }
@@ -3674,6 +3802,15 @@ function escapeHtml(str) {
 
 // ====== Init ======
 function init() {
+  // 🔒 数据保护：先尝试从备份恢复（如果数据丢失）
+  const restored = restoreFromBackup();
+  
+  // 🔒 数据保护：每次打开页面自动备份
+  autoBackup();
+  
+  // 🧹 清理7天前的旧备份
+  cleanOldBackups();
+
   checkDailyReset();
 
   // Restore timer states from localStorage
@@ -3691,6 +3828,10 @@ function init() {
 
   // Load initial page
   refreshPage('yearly-plan');
+
+  if (restored) {
+    setTimeout(() => showToast('🔄 数据已自动恢复！'), 1500);
+  }
 }
 
 // ====== 数据导出/导入 ======
