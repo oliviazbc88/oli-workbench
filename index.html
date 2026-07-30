@@ -1326,7 +1326,10 @@ body::after {
     <div class="sidebar-footer">
       <img src="cat-icon-192.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="">
       <span id="sidebarDate"></span>
-      <span style="margin-left:auto;font-size:0.65rem;color:var(--primary)">v2.0</span>
+      <span style="margin-left:auto;font-size:0.65rem;color:var(--primary)">v2.1</span>
+      <button onclick="exportAllData()" style="margin-left:4px;background:none;border:1px solid var(--primary);color:var(--primary);font-size:0.6rem;padding:2px 5px;border-radius:4px;cursor:pointer" title="导出数据">📤</button>
+      <button onclick="document.getElementById('importFileInput').click()" style="margin-left:2px;background:none;border:1px solid var(--primary);color:var(--primary);font-size:0.6rem;padding:2px 5px;border-radius:4px;cursor:pointer" title="导入数据">📥</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importAllData(this)">
     </div>
   </aside>
 
@@ -3683,6 +3686,48 @@ function init() {
 
   // Load initial page
   refreshPage('yearly-plan');
+}
+
+// ====== 数据导出/导入 ======
+function exportAllData() {
+  const prefix = 'oli_workbench_';
+  const allData = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(prefix)) {
+      allData[key] = JSON.parse(localStorage.getItem(key));
+    }
+  }
+  const json = JSON.stringify(allData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `奥莉冰备份_${today()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importAllData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const count = Object.keys(data).length;
+      if (confirm(`即将导入 ${count} 条数据，会覆盖当前数据。确定继续？`)) {
+        Object.entries(data).forEach(([key, val]) => {
+          localStorage.setItem(key, JSON.stringify(val));
+        });
+        alert('✅ 导入成功！页面即将刷新。');
+        location.reload();
+      }
+    } catch(err) {
+      alert('❌ 文件格式错误');
+    }
+  };
+  reader.readAsText(file);
 }
 
 // Run on load
