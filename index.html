@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="奥莉冰">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#7ecba1">
-<title>奥莉冰 · WorkBuddy</title>
+<title>奥莉冰 · WorkBuddy v2.0</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="192x192" href="cat-icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="cat-icon-512.png">
@@ -1326,6 +1326,7 @@ body::after {
     <div class="sidebar-footer">
       <img src="cat-icon-192.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="">
       <span id="sidebarDate"></span>
+      <span style="margin-left:auto;font-size:0.65rem;color:var(--primary)">v2.0</span>
     </div>
   </aside>
 
@@ -2491,7 +2492,7 @@ function addEnglishTed() {
   const text = input.value.trim();
   if (!text) return;
   const list = storageGet('english_ted', []);
-  list.push({ id: Date.now(), text, done: false });
+  list.push({ id: Date.now(), text, done: false, addedDate: today() });
   storageSet('english_ted', list);
   input.value = '';
   renderEnglishTed();
@@ -2502,7 +2503,12 @@ function toggleEnglishTed(id) {
   const item = list.find(i => i.id === id);
   if (item) {
     item.done = !item.done;
-    item.completedDate = item.done ? today() : '';
+    if (item.done) {
+      item.completedDate = today();
+      if (!item.addedDate) item.addedDate = today();
+    } else {
+      item.completedDate = '';
+    }
   }
   storageSet('english_ted', list);
   renderEnglishTed();
@@ -2537,7 +2543,7 @@ function addEnglishInterview() {
   const text = input.value.trim();
   if (!text) return;
   const list = storageGet('english_interview', []);
-  list.push({ id: Date.now(), text, done: false });
+  list.push({ id: Date.now(), text, done: false, addedDate: today() });
   storageSet('english_interview', list);
   input.value = '';
   renderEnglishInterview();
@@ -2548,7 +2554,8 @@ function toggleEnglishInterview(id) {
   const item = list.find(i => i.id === id);
   if (item) {
     item.done = !item.done;
-    item.completedDate = item.done ? today() : '';
+    if (item.done) { item.completedDate = today(); if (!item.addedDate) item.addedDate = today(); }
+    else { item.completedDate = ''; }
   }
   storageSet('english_interview', list);
   renderEnglishInterview();
@@ -2583,7 +2590,7 @@ function addEnglishTextbook() {
   const text = input.value.trim();
   if (!text) return;
   const list = storageGet('english_textbook', []);
-  list.push({ id: Date.now(), text, done: false });
+  list.push({ id: Date.now(), text, done: false, addedDate: today() });
   storageSet('english_textbook', list);
   input.value = '';
   renderEnglishTextbook();
@@ -2594,7 +2601,8 @@ function toggleEnglishTextbook(id) {
   const item = list.find(i => i.id === id);
   if (item) {
     item.done = !item.done;
-    item.completedDate = item.done ? today() : '';
+    if (item.done) { item.completedDate = today(); if (!item.addedDate) item.addedDate = today(); }
+    else { item.completedDate = ''; }
   }
   storageSet('english_textbook', list);
   renderEnglishTextbook();
@@ -2629,7 +2637,7 @@ function addEnglishSpeaking() {
   const text = input.value.trim();
   if (!text) return;
   const list = storageGet('english_speaking', []);
-  list.push({ id: Date.now(), text, done: false });
+  list.push({ id: Date.now(), text, done: false, addedDate: today() });
   storageSet('english_speaking', list);
   input.value = '';
   renderEnglishSpeaking();
@@ -2640,7 +2648,8 @@ function toggleEnglishSpeaking(id) {
   const item = list.find(i => i.id === id);
   if (item) {
     item.done = !item.done;
-    item.completedDate = item.done ? today() : '';
+    if (item.done) { item.completedDate = today(); if (!item.addedDate) item.addedDate = today(); }
+    else { item.completedDate = ''; }
   }
   storageSet('english_speaking', list);
   renderEnglishSpeaking();
@@ -2840,7 +2849,12 @@ function toggleSpanishItem(key, id) {
   const item = list.find(i => i.id === id);
   if (item) {
     item.done = !item.done;
-    item.completedDate = item.done ? today() : '';
+    if (item.done) {
+      item.completedDate = today();
+      if (!item.addedDate) item.addedDate = today();
+    } else {
+      item.completedDate = '';
+    }
   }
   storageSet(key, list);
   renderSpanish();
@@ -2858,7 +2872,7 @@ function addSpanishItem(key, inputId) {
   const text = input.value.trim();
   if (!text) return;
   const list = storageGet(key, []);
-  list.push({ id: Date.now(), text, done: false });
+  list.push({ id: Date.now(), text, done: false, addedDate: today() });
   storageSet(key, list);
   input.value = '';
   renderSpanish();
