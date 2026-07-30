@@ -1837,19 +1837,26 @@ body::after {
 <!-- Service Worker -->
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    // Check for updates
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // New version available — auto-refresh
-          newWorker.postMessage('skipWaiting');
-          window.location.reload();
-        }
-      });
+  // Force unregister old caches then register fresh
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k))).then(() => {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    }).then(() => {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage('skipWaiting');
+              window.location.reload();
+            }
+          });
+        });
+        // Reload after registration to ensure fresh content
+        setTimeout(() => { window.location.reload(); }, 500);
+      }).catch(() => {});
     });
-  }).catch(() => {});
+  });
 }
 </script>
 
