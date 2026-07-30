@@ -2492,7 +2492,10 @@ function addEnglishTed() {
 function toggleEnglishTed(id) {
   const list = storageGet('english_ted', []);
   const item = list.find(i => i.id === id);
-  if (item) item.done = !item.done;
+  if (item) {
+    item.done = !item.done;
+    item.completedDate = item.done ? today() : '';
+  }
   storageSet('english_ted', list);
   renderEnglishTed();
 }
@@ -2511,6 +2514,7 @@ function renderEnglishTed() {
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishTed(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishTed(${item.id})">✕</button>
     </div>`;
   });
@@ -2533,7 +2537,10 @@ function addEnglishInterview() {
 function toggleEnglishInterview(id) {
   const list = storageGet('english_interview', []);
   const item = list.find(i => i.id === id);
-  if (item) item.done = !item.done;
+  if (item) {
+    item.done = !item.done;
+    item.completedDate = item.done ? today() : '';
+  }
   storageSet('english_interview', list);
   renderEnglishInterview();
 }
@@ -2552,6 +2559,7 @@ function renderEnglishInterview() {
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishInterview(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishInterview(${item.id})">✕</button>
     </div>`;
   });
@@ -2574,7 +2582,10 @@ function addEnglishTextbook() {
 function toggleEnglishTextbook(id) {
   const list = storageGet('english_textbook', []);
   const item = list.find(i => i.id === id);
-  if (item) item.done = !item.done;
+  if (item) {
+    item.done = !item.done;
+    item.completedDate = item.done ? today() : '';
+  }
   storageSet('english_textbook', list);
   renderEnglishTextbook();
 }
@@ -2593,6 +2604,7 @@ function renderEnglishTextbook() {
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishTextbook(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishTextbook(${item.id})">✕</button>
     </div>`;
   });
@@ -2615,7 +2627,10 @@ function addEnglishSpeaking() {
 function toggleEnglishSpeaking(id) {
   const list = storageGet('english_speaking', []);
   const item = list.find(i => i.id === id);
-  if (item) item.done = !item.done;
+  if (item) {
+    item.done = !item.done;
+    item.completedDate = item.done ? today() : '';
+  }
   storageSet('english_speaking', list);
   renderEnglishSpeaking();
 }
@@ -2634,6 +2649,7 @@ function renderEnglishSpeaking() {
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishSpeaking(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishSpeaking(${item.id})">✕</button>
     </div>`;
   });
@@ -2798,6 +2814,7 @@ function renderSpanishList(key, listId) {
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleSpanishItem('${key}',${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteSpanishItem('${key}',${item.id})">✕</button>
     </div>`;
   });
@@ -2808,7 +2825,10 @@ function renderSpanishList(key, listId) {
 function toggleSpanishItem(key, id) {
   const list = storageGet(key, []);
   const item = list.find(i => i.id === id);
-  if (item) item.done = !item.done;
+  if (item) {
+    item.done = !item.done;
+    item.completedDate = item.done ? today() : '';
+  }
   storageSet(key, list);
   renderSpanish();
 }
