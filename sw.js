@@ -1,10 +1,11 @@
-const CACHE_NAME = 'oli-workbench-v3';
+const CACHE_NAME = 'oli-workbench-v4';
 const ASSETS = [
   '/oli-workbench/index.html',
   '/oli-workbench/manifest.json',
   '/oli-workbench/cat-icon-192.png',
   '/oli-workbench/cat-icon-512.png',
-  '/oli-workbench/favicon.png'
+  '/oli-workbench/favicon.png',
+  '/oli-workbench/apple-icon-180.png'
 ];
 
 // Network-first strategy: always try network, fallback to cache
