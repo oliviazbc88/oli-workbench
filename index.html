@@ -3695,17 +3695,43 @@ function exportAllData() {
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith(prefix)) {
-      allData[key] = JSON.parse(localStorage.getItem(key));
+      try { allData[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
     }
   }
-  const json = JSON.stringify(allData, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `奥莉冰备份_${today()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const json = JSON.stringify(allData);
+  // Try download first, fallback to clipboard
+  try {
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `奥莉冰备份_${today()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    alert('✅ 备份文件已下载！请保存好此文件。');
+  } catch(e) {
+    // Fallback: copy to clipboard
+    navigator.clipboard.writeText(json).then(() => {
+      alert('✅ 数据已复制到剪贴板！请粘贴保存为 .json 文件。');
+    }).catch(() => {
+      // Last resort: show in textarea
+      showExportModal(json);
+    });
+  }
+}
+
+function showExportModal(json) {
+  const modal = document.getElementById('newsModal');
+  modal.innerHTML = `<div class="news-modal-content" style="position:relative">
+    <button class="news-modal-close" onclick="closeNewsModal()">✕</button>
+    <h3>📤 导出数据</h3>
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px">全选复制以下内容，保存为 .json 文件</p>
+    <textarea readonly style="width:100%;height:200px;font-size:0.7rem;font-family:monospace;border:1px solid var(--border);border-radius:4px;padding:8px" onclick="this.select()">${escapeHtml(json)}</textarea>
+    <button class="btn btn-primary mt-8" onclick="navigator.clipboard.writeText(document.querySelector('.news-modal-content textarea').value).then(()=>alert('✅ 已复制！'))">📋 复制到剪贴板</button>
+  </div>`;
+  modal.classList.add('show');
 }
 
 function importAllData(input) {
@@ -3724,10 +3750,11 @@ function importAllData(input) {
         location.reload();
       }
     } catch(err) {
-      alert('❌ 文件格式错误');
+      alert('❌ 文件格式错误：' + err.message);
     }
   };
   reader.readAsText(file);
+  input.value = '';
 }
 
 // Run on load
