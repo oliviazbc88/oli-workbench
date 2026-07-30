@@ -12,7 +12,7 @@
 <meta name="msapplication-TileColor" content="#f0faf4">
 <meta name="application-name" content="奥莉冰">
 <meta name="msapplication-config" content="none">
-<title>奥莉冰 · WorkBuddy v2.7</title>
+<title>奥莉冰 · WorkBuddy v2.8</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120.png">
 <link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152.png">
@@ -1853,25 +1853,22 @@ body::after {
 <!-- Service Worker -->
 <script>
 if ('serviceWorker' in navigator) {
-  // Force unregister old caches then register fresh
-  caches.keys().then(keys => keys.forEach(k => caches.delete(k))).then(() => {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => r.unregister());
-    }).then(() => {
-      navigator.serviceWorker.register('sw.js').then(reg => {
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              newWorker.postMessage('skipWaiting');
-              window.location.reload();
-            }
-          });
-        });
-        // Reload after registration to ensure fresh content
-        setTimeout(() => { window.location.reload(); }, 500);
-      }).catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // 检测新版本
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // 有新版本可用，提示用户刷新
+          console.log('🔄 发现新版本，提示用户刷新');
+          if (confirm('✨ 发现新版本！是否立即刷新？')) {
+            newWorker.postMessage('skipWaiting');
+            window.location.reload();
+          }
+        }
+      });
     });
+  }).catch(() => {});
   });
 }
 </script>
