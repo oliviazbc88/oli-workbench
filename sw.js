@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oli-workbench-v10';
+const CACHE_NAME = 'oli-workbench-v11';
 const ASSETS = [
   '/oli-workbench/index.html',
   '/oli-workbench/manifest.json',
