@@ -1,7 +1,7 @@
 {
   "name": "奥莉冰 · WorkBuddy",
   "short_name": "奥莉冰",
-  "description": "奥莉冰个人工作台 - 目标规划、学习打卡、灵感记录、每周复盘",
+  "description": "奥莉冰个人工作台",
   "start_url": "/oli-workbench/index.html",
   "scope": "/oli-workbench/",
   "display": "standalone",
@@ -10,12 +10,12 @@
   "theme_color": "#7ecba1",
   "icons": [
     {
-      "src": "cat-icon-192.png",
+      "src": "data:image/png;base64,' + b64_192 + '",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "cat-icon-512.png",
+      "src": "data:image/png;base64,' + b64_512 + '",
       "sizes": "512x512",
       "type": "image/png"
     }
