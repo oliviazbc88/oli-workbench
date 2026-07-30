@@ -2436,7 +2436,12 @@ function renderEnglishCalendar() {
 
 function renderEnglishStats() {
   const cal = storageGet('english_calendar', {});
-  const mk = getMonthKey();
+  // Use the same month offset as the calendar view
+  const now = new Date();
+  const viewDate = new Date(now.getFullYear(), now.getMonth() + englishCalOffset, 1);
+  const year = viewDate.getFullYear();
+  const month = String(viewDate.getMonth() + 1).padStart(2, '0');
+  const mk = `${year}-${month}`;
   let entries = [];
   let total = 0;
   Object.keys(cal).forEach(date => {
@@ -2744,7 +2749,12 @@ function renderSpanishCalendar() {
 
 function renderSpanishStats() {
   const cal = storageGet('spanish_calendar', {});
-  const mk = getMonthKey();
+  // Use the same month offset as the calendar view
+  const now = new Date();
+  const viewDate = new Date(now.getFullYear(), now.getMonth() + spanishCalOffset, 1);
+  const year = viewDate.getFullYear();
+  const month = String(viewDate.getMonth() + 1).padStart(2, '0');
+  const mk = `${year}-${month}`;
   let entries = [];
   let total = 0;
   Object.keys(cal).forEach(date => {
