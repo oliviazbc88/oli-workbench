@@ -2519,10 +2519,11 @@ function renderEnglishTed() {
   const list = storageGet('english_ted', []);
   let html = '';
   list.forEach(item => {
+    const doneDate = item.done ? (item.completedDate || item.addedDate || '已完成') : '';
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishTed(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
-      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
+      ${doneDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${doneDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishTed(${item.id})">✕</button>
     </div>`;
   });
@@ -2564,10 +2565,11 @@ function renderEnglishInterview() {
   const list = storageGet('english_interview', []);
   let html = '';
   list.forEach(item => {
+    const doneDate = item.done ? (item.completedDate || item.addedDate || '已完成') : '';
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishInterview(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
-      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
+      ${doneDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${doneDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishInterview(${item.id})">✕</button>
     </div>`;
   });
@@ -2609,10 +2611,11 @@ function renderEnglishTextbook() {
   const list = storageGet('english_textbook', []);
   let html = '';
   list.forEach(item => {
+    const doneDate = item.done ? (item.completedDate || item.addedDate || '已完成') : '';
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishTextbook(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
-      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
+      ${doneDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${doneDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishTextbook(${item.id})">✕</button>
     </div>`;
   });
@@ -2654,10 +2657,11 @@ function renderEnglishSpeaking() {
   const list = storageGet('english_speaking', []);
   let html = '';
   list.forEach(item => {
+    const doneDate = item.done ? (item.completedDate || item.addedDate || '已完成') : '';
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleEnglishSpeaking(${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
-      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
+      ${doneDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${doneDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteEnglishSpeaking(${item.id})">✕</button>
     </div>`;
   });
@@ -2819,10 +2823,11 @@ function renderSpanishList(key, listId) {
   const list = storageGet(key, []);
   let html = '';
   list.forEach(item => {
+    const doneDate = item.done ? (item.completedDate || item.addedDate || '已完成') : '';
     html += `<div class="todo-item">
       <div class="todo-check ${item.done ? 'done' : ''}" onclick="toggleSpanishItem('${key}',${item.id})">${item.done ? '✓' : ''}</div>
       <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
-      ${item.done && item.completedDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${item.completedDate}</span>` : ''}
+      ${doneDate ? `<span style="font-size:0.7rem;color:var(--primary);white-space:nowrap;margin-left:4px">✅ ${doneDate}</span>` : ''}
       <button class="todo-delete" onclick="deleteSpanishItem('${key}',${item.id})">✕</button>
     </div>`;
   });
