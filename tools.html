@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奥莉冰 · 数据工具</title>
+<style>
+  body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; padding:20px; background:#f0faf4; }
+  h2 { color:#5aad82; }
+  .btn { display:block; width:100%; padding:16px; margin:10px 0; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; text-align:center; }
+  .btn-export { background:#7ecba1; color:#fff; }
+  .btn-clear { background:#e74c3c; color:#fff; }
+  .btn-app { background:#4a6b5a; color:#fff; }
+  textarea { width:100%; height:200px; margin:10px 0; border:1px solid #ccc; border-radius:8px; padding:10px; font-family:monospace; font-size:0.8rem; }
+  .card { background:#fff; border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); }
+  .note { font-size:0.8rem; color:#888; margin-top:6px; }
+</style>
+</head>
+<body>
+<h2>🐱 奥莉冰 · 数据工具</h2>
+
+<div class="card">
+  <p style="font-weight:700;color:#5aad82">步骤 1：导出备份</p>
+  <button class="btn btn-export" onclick="doExport()">📤 导出所有数据</button>
+  <p class="note">数据会显示在下方，复制保存到备忘录</p>
+  <textarea id="exportArea" readonly onclick="this.select()" placeholder="点击导出按钮..."></textarea>
+  <button class="btn" style="background:#5aad82;color:#fff" onclick="copyExport()">📋 复制到剪贴板</button>
+</div>
+
+<div class="card">
+  <p style="font-weight:700;color:#e74c3c">步骤 2：清缓存</p>
+  <button class="btn btn-clear" onclick="doClear()">🗑 清除所有缓存和数据</button>
+  <p class="note">⚠️ 这会清除旧缓存和旧数据（上一步已备份）</p>
+</div>
+
+<div class="card">
+  <p style="font-weight:700;color:#4a6b5a">步骤 3：打开新版</p>
+  <button class="btn btn-app" onclick="location.href='index.html'">🚀 打开奥莉冰工作台 v2.1</button>
+  <p class="note">打开后检查侧边栏是否显示 v2.1</p>
+</div>
+
+<div class="card">
+  <p style="font-weight:700">步骤 4：恢复数据</p>
+  <p class="note">打开工作台后，点侧边栏 📥 导入，粘贴备份数据，或者上传备份文件</p>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="doImport(this)">
+  <button class="btn" style="background:#7ecba1;color:#fff" onclick="document.getElementById('importFile').click()">📥 选择备份文件导入</button>
+</div>
+
+<script>
+function doExport() {
+  const prefix = 'oli_workbench_';
+  const allData = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(prefix)) {
+      try { allData[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+    }
+  }
+  const json = JSON.stringify(allData);
+  document.getElementById('exportArea').value = json;
+}
+
+function copyExport() {
+  const text = document.getElementById('exportArea').value;
+  if (!text) return alert('请先导出数据');
+  navigator.clipboard.writeText(text).then(() => alert('✅ 已复制！请粘贴到备忘录保存')).catch(() => alert('复制失败，请手动全选复制'));
+}
+
+function doClear() {
+  if (!confirm('确定清除所有缓存和数据？\n\n请确保已备份数据！')) return;
+  // Clear all caches
+  if ('caches' in window) {
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  }
+  // Unregister service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+  }
+  // Clear localStorage
+  localStorage.clear();
+  alert('✅ 已清除！现在点击"打开奥莉冰工作台"');
+}
+
+function doImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      Object.entries(data).forEach(([key, val]) => {
+        localStorage.setItem(key, JSON.stringify(val));
+      });
+      alert('✅ 导入成功！现在打开工作台即可看到数据');
+    } catch(err) {
+      alert('❌ 文件格式错误');
+    }
+  };
+  reader.readAsText(file);
+}
+</script>
+</body>
+</html>
