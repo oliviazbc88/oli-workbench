@@ -12,7 +12,7 @@
 <meta name="msapplication-TileColor" content="#f0faf4">
 <meta name="application-name" content="奥莉冰">
 <meta name="msapplication-config" content="none">
-<title>奥莉冰 · WorkBuddy v2.9</title>
+<title>奥莉冰 · WorkBuddy v3.0</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120.png">
 <link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152.png">
@@ -2021,37 +2021,42 @@ function storageGet(key, fallback) {
   } catch(e) { return fallback; }
 }
 function storageSet(key, val) {
-  localStorage.setItem(STORAGE_KEY + key, JSON.stringify(val));
+  try {
+    localStorage.setItem(STORAGE_KEY + key, JSON.stringify(val));
+  } catch(e) {
+    console.error('保存失败:', key, e);
+    showToast('⚠️ 存储空间不足，请导出备份后清理');
+  }
 }
 
-// Daily reset check
+// Daily reset check - 安全版本：不会清空重要数据
 function checkDailyReset() {
   const lastDate = storageGet('last_date', '');
   const t = today();
   if (lastDate !== t) {
-    // Reset daily data
-    storageSet('daily_todos', []);
+    // 只重置计时器秒数，不清空每日计划和其他数据
+    const oldEngSecs = storageGet('english_timer_secs', 0);
+    const oldSpaSecs = storageGet('spanish_timer_secs', 0);
+    
+    // 保存昨天的计时到日历
+    if (lastDate && oldEngSecs > 0) {
+      const cal = storageGet('english_calendar', {});
+      cal[lastDate] = Math.round(oldEngSecs / 60);
+      storageSet('english_calendar', cal);
+    }
+    if (lastDate && oldSpaSecs > 0) {
+      const cal = storageGet('spanish_calendar', {});
+      cal[lastDate] = Math.round(oldSpaSecs / 60);
+      storageSet('spanish_calendar', cal);
+    }
+    
+    // 重置计时器（不重置每日计划、灵感、笔记等重要数据）
     storageSet('english_timer_secs', 0);
     storageSet('spanish_timer_secs', 0);
     storageSet('sports_today', false);
-    storageSet('betterme_journal', '');
     storageSet('last_date', t);
-    // Save yesterday's English time to calendar
-    if (lastDate) {
-      const engSecs = storageGet('english_timer_secs_yesterday', 0);
-      const spaSecs = storageGet('spanish_timer_secs_yesterday', 0);
-      if (engSecs > 0) {
-        const cal = storageGet('english_calendar', {});
-        cal[lastDate] = Math.round(engSecs / 60);
-        storageSet('english_calendar', cal);
-      }
-      if (spaSecs > 0) {
-        const cal = storageGet('spanish_calendar', {});
-        cal[lastDate] = Math.round(spaSecs / 60);
-        storageSet('spanish_calendar', cal);
-      }
-    }
-    // Update sports streak
+    
+    // 更新运动连续天数
     updateSportsStreak();
     return true;
   }
@@ -3813,7 +3818,19 @@ function init() {
   // 🧹 清理7天前的旧备份
   cleanOldBackups();
 
+  // 📅 每日重置（安全版本，不会清空重要数据）
   checkDailyReset();
+
+  // ⚠️ 检测存储是否可用
+  try {
+    localStorage.setItem('_test_storage', '1');
+    if (localStorage.getItem('_test_storage') !== '1') {
+      showToast('⚠️ 浏览器存储不可用，数据无法保存');
+    }
+    localStorage.removeItem('_test_storage');
+  } catch(e) {
+    showToast('⚠️ 浏览器存储被禁用，请检查设置');
+  }
 
   // Restore timer states from localStorage
   if (storageGet('eng_timer_running', false) || storageGet('spa_timer_running', false)) {

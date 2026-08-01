@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oli-workbench-v11';
+const CACHE_NAME = 'oli-workbench-v12';
 const ASSETS = [
   '/oli-workbench/index.html',
   '/oli-workbench/manifest.json',
@@ -17,9 +17,9 @@ const ASSETS = [
 // This ensures users always get the latest version
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
   );
-  self.skipWaiting();
+  // 不自动 skipWaiting，避免页面被意外接管
 });
 
 self.addEventListener('activate', event => {
@@ -30,7 +30,7 @@ self.addEventListener('activate', event => {
       );
     })
   );
-  self.clients.claim();
+  // 不自动 claim，让用户下次打开时自然切换
 });
 
 self.addEventListener('fetch', event => {
