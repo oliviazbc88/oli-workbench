@@ -12,7 +12,7 @@
 <meta name="msapplication-TileColor" content="#f0faf4">
 <meta name="application-name" content="奥莉冰">
 <meta name="msapplication-config" content="none">
-<title>奥莉冰 · WorkBuddy v3.1</title>
+<title>奥莉冰 · WorkBuddy v3.2</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120.png">
 <link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152.png">
@@ -2115,6 +2115,7 @@ function addYearlyGoal() {
   storageSet('yearly_goals', goals);
   input.value = '';
   renderYearlyGoals();
+  showToast('✅ 年度目标已保存');
 }
 
 function toggleYearlyGoal(id) {
@@ -2123,6 +2124,7 @@ function toggleYearlyGoal(id) {
   if (g) g.done = !g.done;
   storageSet('yearly_goals', goals);
   renderYearlyGoals();
+  showToast('✅ 状态已更新');
 }
 
 function deleteYearlyGoal(id) {
@@ -2130,6 +2132,7 @@ function deleteYearlyGoal(id) {
   goals = goals.filter(g => g.id !== id);
   storageSet('yearly_goals', goals);
   renderYearlyGoals();
+  showToast('🗑️ 已删除');
 }
 
 function renderYearlyGoals() {
@@ -2171,6 +2174,7 @@ function addDailyTodo() {
   storageSet('daily_todos', todos);
   input.value = '';
   renderDailyTodos();
+  showToast('✅ 每日计划已保存');
 }
 
 function toggleDailyTodo(id) {
@@ -2179,6 +2183,7 @@ function toggleDailyTodo(id) {
   if (t) t.done = !t.done;
   storageSet('daily_todos', todos);
   renderDailyTodos();
+  showToast('✅ 状态已更新');
 }
 
 function deleteDailyTodo(id) {
@@ -2186,6 +2191,7 @@ function deleteDailyTodo(id) {
   todos = todos.filter(t => t.id !== id);
   storageSet('daily_todos', todos);
   renderDailyTodos();
+  showToast('🗑️ 已删除');
 }
 
 function renderDailyTodos() {
@@ -2232,6 +2238,7 @@ function addReadingBook() {
   nameInput.value = '';
   pagesInput.value = '';
   renderReadingList();
+  showToast('📚 阅读书籍已添加');
 }
 
 function updateReadingPages(id, readPages) {
@@ -2255,6 +2262,7 @@ function toggleReadingDone(id) {
   }
   storageSet('reading_books', books);
   renderReadingList();
+  showToast('📖 进度已更新');
 }
 
 function deleteReadingBook(id) {
@@ -2262,6 +2270,7 @@ function deleteReadingBook(id) {
   books = books.filter(b => b.id !== id);
   storageSet('reading_books', books);
   renderReadingList();
+  showToast('🗑️ 书籍已删除');
 }
 
 function renderReadingList() {
@@ -2638,6 +2647,7 @@ function addEnglishTed() {
   storageSet('english_ted', list);
   input.value = '';
   renderEnglishTed();
+  showToast('🇬🇧 TED已保存');
 }
 
 function toggleEnglishTed(id) {
@@ -2654,6 +2664,7 @@ function toggleEnglishTed(id) {
   }
   storageSet('english_ted', list);
   renderEnglishTed();
+  showToast('✅ 状态已更新');
 }
 
 function deleteEnglishTed(id) {
@@ -2661,6 +2672,7 @@ function deleteEnglishTed(id) {
   list = list.filter(i => i.id !== id);
   storageSet('english_ted', list);
   renderEnglishTed();
+  showToast('🗑️ 已删除');
 }
 
 function renderEnglishTed() {
@@ -2689,6 +2701,7 @@ function addEnglishInterview() {
   storageSet('english_interview', list);
   input.value = '';
   renderEnglishInterview();
+  showToast('🇬🇧 采访已保存');
 }
 
 function toggleEnglishInterview(id) {
@@ -2701,6 +2714,7 @@ function toggleEnglishInterview(id) {
   }
   storageSet('english_interview', list);
   renderEnglishInterview();
+  showToast('🇬🇧 采访已保存');
 }
 
 function deleteEnglishInterview(id) {
@@ -2708,6 +2722,7 @@ function deleteEnglishInterview(id) {
   list = list.filter(i => i.id !== id);
   storageSet('english_interview', list);
   renderEnglishInterview();
+  showToast('🗑️ 已删除');
 }
 
 function renderEnglishInterview() {
@@ -2736,6 +2751,7 @@ function addEnglishTextbook() {
   storageSet('english_textbook', list);
   input.value = '';
   renderEnglishTextbook();
+  showToast('🇬🇧 课本已保存');
 }
 
 function toggleEnglishTextbook(id) {
@@ -2748,6 +2764,7 @@ function toggleEnglishTextbook(id) {
   }
   storageSet('english_textbook', list);
   renderEnglishTextbook();
+  showToast('🇬🇧 课本已保存');
 }
 
 function deleteEnglishTextbook(id) {
@@ -2755,6 +2772,7 @@ function deleteEnglishTextbook(id) {
   list = list.filter(i => i.id !== id);
   storageSet('english_textbook', list);
   renderEnglishTextbook();
+  showToast('🗑️ 已删除');
 }
 
 function renderEnglishTextbook() {
@@ -2783,6 +2801,7 @@ function addEnglishSpeaking() {
   storageSet('english_speaking', list);
   input.value = '';
   renderEnglishSpeaking();
+  showToast('🇬🇧 口语已保存');
 }
 
 function toggleEnglishSpeaking(id) {
@@ -2795,6 +2814,7 @@ function toggleEnglishSpeaking(id) {
   }
   storageSet('english_speaking', list);
   renderEnglishSpeaking();
+  showToast('🇬🇧 口语已保存');
 }
 
 function deleteEnglishSpeaking(id) {
@@ -2802,6 +2822,7 @@ function deleteEnglishSpeaking(id) {
   list = list.filter(i => i.id !== id);
   storageSet('english_speaking', list);
   renderEnglishSpeaking();
+  showToast('🗑️ 已删除');
 }
 
 function renderEnglishSpeaking() {
@@ -3007,6 +3028,7 @@ function deleteSpanishItem(key, id) {
   list = list.filter(i => i.id !== id);
   storageSet(key, list);
   renderSpanish();
+  showToast('🗑️ 已删除');
 }
 
 function addSpanishItem(key, inputId) {
@@ -3018,6 +3040,7 @@ function addSpanishItem(key, inputId) {
   storageSet(key, list);
   input.value = '';
   renderSpanish();
+  showToast('🇪🇸 已保存');
 }
 
 function addSpanishListening() { addSpanishItem('spanish_listening', 'spanishListeningInput'); }
@@ -3045,6 +3068,7 @@ function addBookNote() {
   titleEl.value = '';
   contentEl.value = '';
   renderBookNotes();
+  showToast('📖 笔记已保存');
 }
 
 function deleteBookNote(id) {
@@ -3052,6 +3076,7 @@ function deleteBookNote(id) {
   notes = notes.filter(n => n.id !== id);
   storageSet('book_notes', notes);
   renderBookNotes();
+  showToast('🗑️ 已删除');
 }
 
 function renderBookNotes() {
@@ -3267,6 +3292,7 @@ function addInspiration() {
   storageSet('inspirations', notes);
   input.value = '';
   renderInspiration();
+  showToast('💡 灵感已捕捉');
 }
 
 function deleteInspiration(id) {
@@ -3274,6 +3300,7 @@ function deleteInspiration(id) {
   notes = notes.filter(n => n.id !== id);
   storageSet('inspirations', notes);
   renderInspiration();
+  showToast('🗑️ 已删除');
 }
 
 function editInspiration(id) {
@@ -3741,6 +3768,7 @@ function addBetterMeEntry() {
   selectedEmoji = '😊';
 
   renderBetterMe();
+  showToast('💝 心情已记录');
 }
 
 function deleteBetterMeEntry(id) {
@@ -3748,6 +3776,7 @@ function deleteBetterMeEntry(id) {
   entries = entries.filter(e => e.id !== id);
   storageSet('betterme_entries', entries);
   renderBetterMe();
+  showToast('🗑️ 心情已删除');
 }
 
 function renderBetterMe() {
